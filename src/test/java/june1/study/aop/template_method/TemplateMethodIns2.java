@@ -1,6 +1,6 @@
-package june1.study.aop;
+package june1.study.aop.template_method;
 
-public class Logic_2 extends AbstractTemplateMethod {
+public class TemplateMethodIns2 extends TemplateMethod {
 
     @Override
     public void call() {

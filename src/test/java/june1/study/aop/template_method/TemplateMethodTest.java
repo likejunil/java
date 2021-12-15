@@ -1,4 +1,4 @@
-package june1.study.aop;
+package june1.study.aop.template_method;
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
@@ -40,13 +40,13 @@ public class TemplateMethodTest {
     void test_2() {
         //Logic_1, Logic_2 클래스를 따로 생성
         //필요한 만큼 생성해야 하는 불편함
-        Logic_1 logic_1 = new Logic_1();
-        Logic_2 logic_2 = new Logic_2();
+        TemplateMethodIns1 logic_1 = new TemplateMethodIns1();
+        TemplateMethodIns2 logic_2 = new TemplateMethodIns2();
         logic_1.execute();
         logic_2.execute();
 
         //익명 클래스를 사용하여 해결할 수 있다.
-        AbstractTemplateMethod logic_3 = new AbstractTemplateMethod() {
+        TemplateMethod logic_3 = new TemplateMethod() {
             @Override
             public void call() {
                 System.out.println("로직 3을 실행합니다.");

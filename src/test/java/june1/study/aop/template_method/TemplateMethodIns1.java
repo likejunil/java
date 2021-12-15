@@ -1,9 +1,9 @@
-package june1.study.aop;
+package june1.study.aop.template_method;
 
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
-public class Logic_1 extends AbstractTemplateMethod {
+public class TemplateMethodIns1 extends TemplateMethod {
 
     @Override
     public void call() {

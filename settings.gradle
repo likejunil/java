@@ -1,0 +1,6 @@
+rootProject.name = 'multi-project'
+include 'domain-module'
+include 'web-module'
+include 'batch-module'
+include 'quartz-module'
+

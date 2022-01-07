@@ -1,0 +1,34 @@
+plugins {
+    id 'java'
+    id "com.ewerk.gradle.plugins.querydsl" version "1.0.10"
+}
+
+group 'june1'
+version '0.0.1-SNAPSHOT'
+
+dependencies {
+    implementation project(':domain-module')
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'com.querydsl:querydsl-jpa'
+    runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'
+}
+
+def querydslDir = "$buildDir/generated/querydsl"
+
+querydsl {
+    jpa = true
+    querydslSourcesDir = querydslDir
+}
+
+sourceSets {
+    main.java.srcDir querydslDir
+}
+
+configurations {
+    querydsl.extendsFrom compileClasspath
+}
+
+compileQuerydsl {
+    options.annotationProcessorPath = configurations.querydsl
+}

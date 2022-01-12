@@ -3,9 +3,6 @@ plugins {
     id "com.ewerk.gradle.plugins.querydsl" version "1.0.10"
 }
 
-group 'june1'
-version '0.0.1-SNAPSHOT'
-
 dependencies {
     implementation project(':domain-module')
     implementation 'org.springframework.boot:spring-boot-starter-web'

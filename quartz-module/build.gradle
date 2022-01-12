@@ -2,11 +2,9 @@ plugins {
     id 'java'
 }
 
-group 'june1'
-version '0.0.1-SNAPSHOT'
-
 dependencies {
     implementation project(':batch-module')
     implementation 'org.springframework.boot:spring-boot-starter-quartz'
+    implementation 'org.springframework.boot:spring-boot-starter-batch'
     runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'
 }

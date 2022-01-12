@@ -4,8 +4,16 @@ plugins {
     id 'java'
 }
 
-//subprojects 는 root 의 하위에 있는 모든 모듈에 적용될 내용들을 작성하는 블록
-//root 는 포함하지 않음, root 를 포함하려면 allprojects 를 사용
+allprojects {
+    group = 'june1'
+    version = '0.0.1-SNAPSHOT'
+    sourceCompatibility = '11'
+
+    repositories {
+        mavenCentral()
+    }
+}
+
 subprojects {
     apply plugin: 'java'
     apply plugin: 'org.springframework.boot'
@@ -17,16 +25,11 @@ subprojects {
         }
     }
 
-    repositories {
-        mavenCentral()
-    }
-
     test {
         useJUnitPlatform()
     }
 
     dependencies {
-        //runtimeOnly 'com.h2database:h2'
         compileOnly 'org.projectlombok:lombok'
         annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
         annotationProcessor 'org.projectlombok:lombok'
@@ -34,12 +37,4 @@ subprojects {
         testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.2'
         testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.2'
     }
-}
-
-group = 'june1'
-version = '0.0.1-SNAPSHOT'
-sourceCompatibility = '11'
-
-repositories {
-    mavenCentral()
 }

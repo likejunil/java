@@ -1,4 +1,4 @@
-package june1.batch.launcher;
+package june1.quartz.launcher;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,7 +28,6 @@ public class Launcher {
 
         //job 생성
         Job job = context.getBean(name, Job.class);
-        log.info("222... [{}] 이름의 job 을 실행합니다.", name);
 
         //job parameter 생성
         JobParametersBuilder builder = new JobParametersBuilder();
@@ -46,7 +45,7 @@ public class Launcher {
             exitStatus = jobLauncher
                     .run(job, builder.toJobParameters())
                     .getExitStatus();
-            log.info("444... job 을 실행하였습니다. 응답코드=[{}]", exitStatus);
+            log.info("-- job 을 실행하였습니다. 응답코드=[{}] --", exitStatus);
         } catch (JobExecutionAlreadyRunningException
                 | JobRestartException
                 | JobInstanceAlreadyCompleteException

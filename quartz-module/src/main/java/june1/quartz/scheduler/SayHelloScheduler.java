@@ -6,7 +6,10 @@ import org.quartz.impl.StdSchedulerFactory;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.ZoneId;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -15,15 +18,19 @@ public class SayHelloScheduler {
 
     @PostConstruct
     void init() throws SchedulerException {
-
+        //this.start();
     }
 
     private void start() throws SchedulerException {
         //-----------------------
         // job 생성, 인자 사용
         //-----------------------
-        JobDataMap baseParams = new JobDataMap();
-        baseParams.put("id", "june1");
+        JobDataMap params = new JobDataMap();
+        params.put("birthday", Date.from(LocalDate.of(1975, 4, 12)
+                .atStartOfDay().atZone(ZoneId.systemDefault()).toInstant()));
+        params.put("id", "june1");
+        params.put("age", 48L);
+        params.put("weight", 175.6);
 
         JobDataMap addParams = new JobDataMap();
         addParams.put("color", "orange");
@@ -32,11 +39,8 @@ public class SayHelloScheduler {
         JobDetail jobDetail = JobBuilder
                 .newJob(SayHelloJob.class)
                 .withIdentity("강백호", "슬램덩크")
-                .setJobData(baseParams)
-                .usingJobData(addParams)
+                .setJobData(params)
                 .build();
-
-        jobDetail.getJobDataMap().put("age", 48);
 
         //-----------------------
         // trigger 생성
@@ -71,13 +75,10 @@ public class SayHelloScheduler {
         //-----------------------
         // scheduler 생성
         //-----------------------
-        boolean on = false;
-        if (on) {
-            Scheduler scheduler = StdSchedulerFactory.getDefaultScheduler();
-            scheduler.scheduleJob(jobDetail, triggers, false);
-            //하나의 job 에 여러개의 trigger 를 연결하여 실행할 수 있음
-            //job, trigger 의 아이덴티티를 통해 중복 등록을 방지
-            scheduler.start();
-        }
+        Scheduler scheduler = StdSchedulerFactory.getDefaultScheduler();
+        scheduler.scheduleJob(jobDetail, triggers, false);
+        //하나의 job 에 여러개의 trigger 를 연결하여 실행할 수 있음
+        //job, trigger 의 아이덴티티를 통해 중복 등록을 방지
+        scheduler.start();
     }
 }

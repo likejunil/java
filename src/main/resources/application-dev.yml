@@ -1,0 +1,51 @@
+spring:
+
+  datasource:
+    url: jdbc:mariadb://localhost/OPEN?characterEncoding=UTF-8&serverTimezone=UTC
+    username: june1
+    password: qweQWE123!@#
+    driver-class-name: org.mariadb.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: create
+    properties:
+      hibernate:
+        show_sql: true
+
+        # 쿼리(SQL 문)를 예쁘게 포맷팅하여 보여준다.
+        format_sql: true
+
+        # SQL 문 이외의 추가적인 정보를 보여준다.
+        use_sql_comments: true
+
+        # 일대다의 관계에서 join fetch 는 데이터가 중복(뻥튀기)된다.
+        # 게다가 paging 을 할 수 없다.
+        # 이러한 경우 일대다의 관계에서 지연로딩을 사용하고..
+        # 다음과 같은 default_batch_fetch_size 를 적용하면..
+        # query 에 in 절을 사용하여 매우 효율적인 결과를 만들 수 있다.
+        # default_batch_fetch_size 는 in 절에 들어갈 원소의 개수이다.
+        # 일반적으로 100 ~ 1000 사이의 값을 권장한다.
+        default_batch_fetch_size: 100
+
+logging.level:
+  org.hibernate.SQL: info
+  org.hibernate.type: info
+  org.springframework.security: debug
+
+server:
+  port: 8080
+  error:
+    # 스프링부트가 제공하는 기본 예외 페이지를 사용한다.(enable = true)
+    whitelabel:
+      enabled: true
+
+    # 고객에게 지나치게 많은 에러 정보가 전달되는 것은 보안상 위험하다.
+    # 개발에서는 always, 운영에서는 never 사용을 권장한다.
+    # never: 결코 사용하지 않음
+    # always: 항상 사용함
+    # on_params: 파라미터가 있을 경우에만 사용함
+    include-exception: true
+    include-message: always
+    include-stacktrace: always
+    include-binding-errors: always

@@ -2,6 +2,9 @@
 .gradle/
 build/
 
+# Mac
+.idea/
+
 # Compiled class file
 *.class
 

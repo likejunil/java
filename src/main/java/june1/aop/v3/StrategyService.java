@@ -5,12 +5,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class StrategyService {
 
-    private final static String title = "TemplateMethodService.save()";
+    private final static String title = "StrategyService.save()";
     private final StrategyRepository strategyRepository;
     private final Context<Void> context;
 

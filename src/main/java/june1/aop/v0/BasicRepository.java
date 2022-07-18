@@ -1,21 +1,14 @@
-package june1.aop.v3;
+package june1.aop.v0;
 
-import june1.aop.trace.Context;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Repository;
 
-@Repository
 @RequiredArgsConstructor
-public class StrategyRepository {
+public class BasicRepository {
 
-    private final static String title = "StrategyRepository.save()";
-    private final Context<Void> context;
+    protected final static String title = "BasicRepository.save()";
 
     public void save(String hello) {
-        context.execute(title, () -> {
-            body(hello);
-            return null;
-        });
+        body(hello);
     }
 
     private void body(String hello) {

@@ -3,7 +3,6 @@ package june1.aop.v2;
 import june1.aop.trace.LogTrace;
 import june1.aop.trace.TemplateMethod;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;

@@ -16,7 +16,11 @@ public class HelloRepository {
         TraceStatus status = null;
         try {
             status = trace.begin(title);
+
+            // --------------------------------------
             body(hello);
+            // --------------------------------------
+
             trace.end(status);
         } catch (Exception e) {
             trace.exception(status, e);

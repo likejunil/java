@@ -13,7 +13,11 @@ public abstract class TemplateMethod<T> {
         TraceStatus status = null;
         try {
             status = logTrace.begin(message);
+
+            // -----------------------------------
             T result = call();
+            // -----------------------------------
+
             logTrace.end(status);
             return result;
         } catch (Exception e) {

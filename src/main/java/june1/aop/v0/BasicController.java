@@ -4,7 +4,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
+@ResponseBody
 @RequestMapping("/v0")
 @RequiredArgsConstructor
 public class BasicController {
@@ -17,13 +19,11 @@ public class BasicController {
     @GetMapping(hello)
     public String hello(@RequestParam String name) {
         basicService.save(name);
-        String ret = "ok";
-        return ret;
+        return "ok";
     }
 
     @GetMapping(hi)
     public String hi() {
-        String ret = "hi";
-        return ret;
+        return "hi";
     }
 }

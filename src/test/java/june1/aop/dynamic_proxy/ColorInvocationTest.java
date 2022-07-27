@@ -11,8 +11,11 @@ class ColorInvocationTest {
 
     @Test
     void test() {
+        //추가하고 싶은 기능..
         LogTrace logTrace = new LogTraceImpl();
+        //추가하려는 본 대상..
         ColorInterface target = new RedImpl();
+
         InvocationHandler handler = new ColorInvocation(target, logTrace);
         ColorInterface proxy = (ColorInterface) Proxy.newProxyInstance(
                 target.getClass().getClassLoader(),

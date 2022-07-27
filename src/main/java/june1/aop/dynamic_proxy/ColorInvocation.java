@@ -14,13 +14,13 @@ public class ColorInvocation implements InvocationHandler {
     private final LogTrace logTrace;
 
     @Override
-    public Object invoke(Object o, Method method, Object[] objects) throws Throwable {
+    public Object invoke(Object o, Method method, Object[] args) throws Throwable {
         String title = method.getDeclaringClass() + "." + method.getName() + "()";
         TraceStatus status = null;
         try {
             status = logTrace.begin(title);
             //------------------------------------------
-            Object ret = method.invoke(target, objects);
+            Object ret = method.invoke(target, args);
             //------------------------------------------
             logTrace.end(status);
             return ret;

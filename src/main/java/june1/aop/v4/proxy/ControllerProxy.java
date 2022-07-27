@@ -1,9 +1,9 @@
-package june1.aop.v0.proxy;
+package june1.aop.v4.proxy;
 
 import june1.aop.trace.LogTrace;
 import june1.aop.trace.TraceStatus;
-import june1.aop.v0.BasicController;
-import june1.aop.v0.BasicService;
+import june1.aop.v4.BasicController;
+import june1.aop.v4.BasicService;
 import org.springframework.web.bind.annotation.GetMapping;
 
 public class ControllerProxy extends BasicController {

@@ -1,4 +1,4 @@
-package june1.aop.v0;
+package june1.aop.v4;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 @ResponseBody
-@RequestMapping("/v0")
+@RequestMapping("/v4")
 @RequiredArgsConstructor
 public class BasicController {
 

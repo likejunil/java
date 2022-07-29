@@ -1,4 +1,4 @@
-package june1.aop.proxy;
+package june1.aop.proxy.basic;
 
 import lombok.RequiredArgsConstructor;
 

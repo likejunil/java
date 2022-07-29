@@ -1,5 +1,8 @@
-package june1.aop.dynamic_proxy;
+package june1.aop.proxy.jdk_dynamic;
 
+import june1.aop.proxy.jdk_dynamic.ColorInterface;
+import june1.aop.proxy.jdk_dynamic.ColorInvocation;
+import june1.aop.proxy.jdk_dynamic.RedImpl;
 import june1.aop.trace.LogTrace;
 import june1.aop.trace.LogTraceImpl;
 import org.junit.jupiter.api.Test;

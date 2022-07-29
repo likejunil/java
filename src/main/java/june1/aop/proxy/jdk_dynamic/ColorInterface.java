@@ -1,4 +1,4 @@
-package june1.aop.dynamic_proxy;
+package june1.aop.proxy.jdk_dynamic;
 
 public interface ColorInterface {
 

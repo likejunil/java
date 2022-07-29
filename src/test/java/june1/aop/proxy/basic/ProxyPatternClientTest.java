@@ -1,5 +1,6 @@
-package june1.aop.proxy;
+package june1.aop.proxy.basic;
 
+import june1.aop.proxy.basic.*;
 import org.junit.jupiter.api.Test;
 
 class ProxyPatternClientTest {

@@ -19,9 +19,11 @@ public class ColorInvocation implements InvocationHandler {
         TraceStatus status = null;
         try {
             status = logTrace.begin(title);
+
             //------------------------------------------
             Object ret = method.invoke(target, args);
             //------------------------------------------
+
             logTrace.end(status);
             return ret;
         } catch (Exception e) {

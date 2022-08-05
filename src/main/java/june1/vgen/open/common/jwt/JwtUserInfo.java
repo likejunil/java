@@ -1,0 +1,15 @@
+package june1.vgen.open.common.jwt;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+
+@Getter
+@AllArgsConstructor
+@Builder
+public class JwtUserInfo {
+
+    private Long seq;
+    private String userId;
+    private Long companySeq;
+}

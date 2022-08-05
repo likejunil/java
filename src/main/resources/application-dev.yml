@@ -1,20 +1,14 @@
 spring:
 
-  redis:
-    host: localhost
-    port: 6379
-    password: qweQWE123!@#
-    timeout: 2000
-
   datasource:
-    url: jdbc:mariadb://localhost/OPEN?characterEncoding=UTF-8&serverTimezone=UTC
+    url: jdbc:mariadb://localhost/OPEN
     username: june1
     password: qweQWE123!@#
     driver-class-name: org.mariadb.jdbc.Driver
 
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
     properties:
       hibernate:
         show_sql: true
@@ -34,13 +28,19 @@ spring:
         # 일반적으로 100 ~ 1000 사이의 값을 권장한다.
         default_batch_fetch_size: 100
 
+    # 영속성 지속의 범위 지정
+    open-in-view: false
+
+  messages:
+    basename: messages, errors
+
 logging.level:
-  org.hibernate.SQL: debug
-  org.hibernate.type: trace
-  org.springframework.security: debug
+  org.hibernate.SQL: info
+  org.hibernate.type: info
+  org.springframework.security: info
 
 server:
-  port: 80
+  port: 8080
   error:
     # 스프링부트가 제공하는 기본 예외 페이지를 사용한다.(enable = true)
     whitelabel:
@@ -58,5 +58,6 @@ server:
 
 jwt:
   secret: dmdlbl9zZWNyZXRfMDIwMV92Z2VuX3NlY3JldF8wMjAxdmdlbl9zZWNyZXRfMDIwMV92Z2VuX3NlY3JldF8wMjAxdmdlbl9zZWNyZXRfMDIwMV92Z2VuX3NlY3JldF8wMjAx
-  valid-seconds: 300 # 지속시간 5분
-  refresh-seconds: 86400 # 지속시간 하루
+  valid-seconds: 1800
+  refresh-seconds: 86400
+

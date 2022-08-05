@@ -1,6 +1,6 @@
 package june1.vgen.open.service;
 
-import june1.vgen.open.common.exception.auth.WrongAccessException;
+import june1.vgen.open.common.exception.auth.WrongAuthoritiesException;
 import june1.vgen.open.common.exception.client.NoSuchCompanyException;
 import june1.vgen.open.common.jwt.JwtUserInfo;
 import june1.vgen.open.common.util.IncreaseNoUtil;
@@ -29,7 +29,7 @@ public class CompanyService {
 
     private final static String object = "CompanyService";
     private final CompanyRepository companyRepository;
-    private final RedisService redisService;
+    private final RedisUserService redisUserService;
 
     /**
      * 회사 등록하기
@@ -93,7 +93,7 @@ public class CompanyService {
         if (companySeq == null || !companySeq.equals(dto.getSeq())) {
             log.error("[{}]사용자에게는 [{}]회사 정보를 수정할 권한이 없음",
                     user.getSeq(), dto.getSeq());
-            throw WrongAccessException.builder()
+            throw WrongAuthoritiesException.builder()
                     .code(CODE_AUTH)
                     .message("회사 정보를 수정할 권한이 없습니다.")
                     .object(object)
@@ -107,7 +107,7 @@ public class CompanyService {
 
         //회사의 타입이 바뀌면 토큰 사용 불가 적용
         if (!c.getCompanyType().name().equals(dto.getCompanyType().name())) {
-            redisService.dropToken(user.getSeq());
+            redisUserService.dropToken(user.getSeq());
         }
 
         //해당 회사의 정보를 수정하고 저장

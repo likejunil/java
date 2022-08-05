@@ -2,6 +2,7 @@ package june1.vgen.open.common.exception.server;
 
 import june1.vgen.open.common.exception.CustomException;
 
+//500 코드 종류의 예외
 public class ServerException extends CustomException {
 
     public ServerException() {

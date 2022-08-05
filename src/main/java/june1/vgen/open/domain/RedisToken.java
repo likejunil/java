@@ -8,10 +8,12 @@ import javax.persistence.Id;
 
 @Getter
 @Builder
-@RedisHash(value = "refresh_token")
-public class RedisRefreshToken implements RefreshTokenInterface {
+@RedisHash(value = "token", timeToLive = 600)
+public class RedisToken {
 
     @Id
+    //사용자의 고유번호
     private Long id;
+    //리프레쉬 토큰
     private String token;
 }

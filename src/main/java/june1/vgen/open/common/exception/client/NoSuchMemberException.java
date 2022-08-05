@@ -1,8 +1,8 @@
-package june1.vgen.open.common.exception.auth;
+package june1.vgen.open.common.exception.client;
 
 import lombok.Builder;
 
-public class NoSuchMemberException extends AuthException {
+public class NoSuchMemberException extends ClientException {
 
     public NoSuchMemberException() {
     }

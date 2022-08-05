@@ -28,7 +28,9 @@ public class AuthController {
      * @return
      */
     @PostMapping(URI_JOIN)
-    public Response<MemberResDto> register(@Valid @RequestBody RegisterMemberReqDto dto) {
+    public Response<MemberResDto> register(
+            @Valid @RequestBody RegisterMemberReqDto dto) {
+
         return Response.ok(authService.register(dto));
     }
 
@@ -39,7 +41,9 @@ public class AuthController {
      * @return
      */
     @PostMapping(URI_LOGIN)
-    public Response<TokenResDto> login(@Valid @RequestBody LoginReqDto reqDto) {
+    public Response<LoginResDto> login(
+            @Valid @RequestBody LoginReqDto reqDto) {
+
         return Response.ok(authService.login(reqDto.getUserId(), reqDto.getPassword()));
     }
 
@@ -50,8 +54,10 @@ public class AuthController {
      * @return
      */
     @PostMapping(URI_REISSUE)
-    public Response<TokenResDto> reissue(@Valid @RequestBody ReissueReqDto reqDto) {
-        return Response.ok(authService.reissue(reqDto.getRefreshToken()));
+    public Response<LoginResDto> reissue(
+            @Valid @RequestBody ReissueReqDto reqDto) {
+
+        return Response.ok(authService.reissue(reqDto.getToken()));
     }
 
     /**
@@ -61,7 +67,9 @@ public class AuthController {
      * @return
      */
     @GetMapping(URI_LOGOUT)
-    public Response<?> logout(@AuthenticationPrincipal JwtUserInfo user) {
+    public Response<?> logout(
+            @AuthenticationPrincipal JwtUserInfo user) {
+
         authService.logout(user);
         return Response.ok(null);
     }

@@ -2,6 +2,7 @@ package june1.vgen.open.common.exception.client;
 
 import june1.vgen.open.common.exception.CustomException;
 
+//400 코드 종류의 예외
 public class ClientException extends CustomException {
 
     public ClientException() {

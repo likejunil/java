@@ -1,6 +1,6 @@
 package june1.vgen.open.service;
 
-import june1.vgen.open.common.exception.auth.NoSuchMemberException;
+import june1.vgen.open.common.exception.client.NoSuchMemberException;
 import june1.vgen.open.common.exception.client.NoSuchCompanyException;
 import june1.vgen.open.common.jwt.JwtUserInfo;
 import june1.vgen.open.common.util.IncreaseNoUtil;
@@ -37,7 +37,7 @@ public class MemberService {
 
     private final MemberRepository memberRepository;
     private final CompanyRepository companyRepository;
-    private final RedisService redisService;
+    private final RedisUserService redisUserService;
 
     /**
      * 관리자 직원이 회사의 소속 직원들 목록을 조회하기
@@ -124,7 +124,7 @@ public class MemberService {
 
         //만약 권한이 변경된 경우 토큰을 사용 불가 상태로 변경
         if (!m.getRole().name().equals(dto.getRole().name())) {
-            redisService.dropToken(m.getId());
+            redisUserService.dropToken(m.getId());
         }
 
         //자신의 정보를 수정하고 저장

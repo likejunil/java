@@ -2,7 +2,7 @@ package june1.vgen.open.common.filter;
 
 import june1.vgen.open.common.jwt.JwtUserInfo;
 import june1.vgen.open.common.jwt.TokenProvider;
-import june1.vgen.open.service.RedisService;
+import june1.vgen.open.service.RedisUserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
@@ -31,7 +31,7 @@ public class JwtFilter extends GenericFilterBean {
     private static final String object = "JwtFilter";
 
     private final TokenProvider tokenProvider;
-    private final RedisService redisService;
+    private final RedisUserService redisUserService;
 
     @Override
     public void doFilter(
@@ -56,7 +56,7 @@ public class JwtFilter extends GenericFilterBean {
                 //redis 에 저장된 액세스 토큰을 검사..
                 //1.redis 가 다운되었거나 엑세스 토큰을 얻을 수 없다면 그냥 통과..
                 //2.redis 에서 얻은 토큰이 사용 불가로 변경되었다면 재로그인 유도..
-                if (!redisService.isValid(user.getSeq())) {
+                if (!redisUserService.isValid(user.getSeq())) {
                     log.info("{} {}=[{}]사용자의 토큰이 사용 불가 상태",
                             filterLogPrefix, object, user.getUserId());
                     HttpServletResponse res = (HttpServletResponse) response;

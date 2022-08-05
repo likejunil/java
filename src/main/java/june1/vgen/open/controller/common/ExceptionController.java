@@ -1,7 +1,10 @@
 package june1.vgen.open.controller.common;
 
 import june1.vgen.open.common.exception.CustomException;
-import june1.vgen.open.common.exception.auth.AuthException;
+import june1.vgen.open.common.exception.auth.NotAcceptableException;
+import june1.vgen.open.common.exception.auth.WrongAuthException;
+import june1.vgen.open.common.exception.auth.WrongAuthenticationException;
+import june1.vgen.open.common.exception.auth.WrongAuthoritiesException;
 import june1.vgen.open.common.exception.client.ClientException;
 import june1.vgen.open.common.exception.server.ServerException;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +33,8 @@ public class ExceptionController {
     //요청 json 을 dto 객체로 변환하는 과정에서 발생하는 에러 처리..
     //MessageSource 객체를 사용하여 에러 메시지를 얻을 수 있다.
     @ExceptionHandler(BindException.class)
-    protected ResponseEntity<Response> handleBindException(BindingResult bindingResult, HttpServletRequest req) {
+    protected ResponseEntity<Response> handleBindException(
+            BindingResult bindingResult, HttpServletRequest req) {
         log.error("바인딩 예외가 발생했습니다.[{}]", req.getRequestURI());
         return ResponseEntity.badRequest()
                 .body(Response.error(null, bindingResult, messageSource));
@@ -66,29 +70,61 @@ public class ExceptionController {
                         .build()));
     }
 
+    //인증과 관련한 예외가 발생했을 때.. (정체를 확인하지 못했을 때)
     @ExceptionHandler
-    protected ResponseEntity<Response> handleAuthException(AuthException e, HttpServletRequest req) {
+    protected ResponseEntity<Response> handleAuthenticationException(
+            WrongAuthenticationException e, HttpServletRequest req) {
         log.error("인증 예외가 발생했습니다.[{}]", req.getRequestURI());
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                 .body(Response.error(null, Error.by(e)));
     }
 
+    //인가와 관련된 예외가 발생했을 때.. (허가받지 못한 자원에 접근했을 때)
     @ExceptionHandler
-    protected ResponseEntity<Response> handleClientException(ClientException e, HttpServletRequest req) {
+    protected ResponseEntity<Response> handleAuthoritiesException(
+            WrongAuthoritiesException e, HttpServletRequest req) {
+        log.error("인가 예외가 발생했습니다.[{}]", req.getRequestURI());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(Response.error(null, Error.by(e)));
+    }
+
+    //보안에 관련된 일반적인 예외가 발생했을 때..
+    @ExceptionHandler
+    protected ResponseEntity<Response> handleAuthException(
+            WrongAuthException e, HttpServletRequest req) {
+        log.error("보안 예외가 발생했습니다.[{}]", req.getRequestURI());
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(Response.error(null, Error.by(e)));
+    }
+
+    //리프레쉬 토큰으로 엑세스 토큰을 재발급 받거나, 다시 로그인을 해야만 할 때..
+    @ExceptionHandler
+    protected ResponseEntity<Response> handleNotAcceptException(
+            NotAcceptableException e, HttpServletRequest req) {
+        log.error("재인증이 필요합니다.[{}]", req.getRequestURI());
+        return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE)
+                .body(Response.error(null, Error.by(e)));
+    }
+
+    @ExceptionHandler
+    protected ResponseEntity<Response> handleClientException(
+            ClientException e, HttpServletRequest req) {
         log.error("클라이언트 예외가 발생했습니다.[{}]", req.getRequestURI());
         return ResponseEntity.badRequest()
                 .body(Response.error(null, Error.by(e)));
     }
 
     @ExceptionHandler
-    protected ResponseEntity<Response> handleServerException(ServerException e, HttpServletRequest req) {
+    protected ResponseEntity<Response> handleServerException(
+            ServerException e, HttpServletRequest req) {
         log.error("서버 예외가 발생했습니다.[{}]", req.getRequestURI());
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(Response.error(null, Error.by(e)));
     }
 
     @ExceptionHandler
-    protected ResponseEntity<Response> handleCustomException(CustomException e, HttpServletRequest req) {
+    protected ResponseEntity<Response> handleCustomException(
+            CustomException e, HttpServletRequest req) {
         log.error("서비스 예외가 발생했습니다.[{}]", req.getRequestURI());
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(Response.error(null, Error.by(e)));

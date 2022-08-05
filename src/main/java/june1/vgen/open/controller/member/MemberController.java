@@ -1,6 +1,6 @@
 package june1.vgen.open.controller.member;
 
-import june1.vgen.open.common.exception.auth.WrongAccessException;
+import june1.vgen.open.common.exception.auth.WrongAuthoritiesException;
 import june1.vgen.open.common.jwt.JwtUserInfo;
 import june1.vgen.open.controller.auth.dto.MemberResDto;
 import june1.vgen.open.controller.common.Response;
@@ -61,7 +61,7 @@ public class MemberController {
 
         if (!user.getSeq().equals(id)) {
             log.error("[{}]사용자가 [{}]조회를 시도하였습니다.", user.getSeq(), id);
-            throw WrongAccessException.builder()
+            throw WrongAuthoritiesException.builder()
                     .code(AUTH)
                     .message("해당 자원에 대한 접근 권한이 부족합니다.")
                     .object(object)

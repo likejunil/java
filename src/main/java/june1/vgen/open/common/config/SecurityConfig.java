@@ -4,7 +4,7 @@ import june1.vgen.open.common.filter.JwtFilter;
 import june1.vgen.open.common.jwt.JwtAccessDeniedHandler;
 import june1.vgen.open.common.jwt.JwtAuthenticationEntryPoint;
 import june1.vgen.open.common.jwt.TokenProvider;
-import june1.vgen.open.service.RedisService;
+import june1.vgen.open.service.RedisUserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
@@ -40,7 +40,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private final TokenProvider tokenProvider;
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
-    private final RedisService redisService;
+    private final RedisUserService redisUserService;
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -60,7 +60,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
         //JWT 필터를 적용
-        http.addFilterBefore(new JwtFilter(tokenProvider, redisService),
+        http.addFilterBefore(new JwtFilter(tokenProvider, redisUserService),
                 UsernamePasswordAuthenticationFilter.class);
 
         //인증(정체 확인) 예외처리, 인가(자원 접근) 예외처리 등록

@@ -10,8 +10,5 @@ import javax.validation.constraints.NotBlank;
 public class ReissueReqDto {
 
     @NotBlank
-    private String accessToken;
-
-    @NotBlank
-    private String refreshToken;
+    private String token;
 }

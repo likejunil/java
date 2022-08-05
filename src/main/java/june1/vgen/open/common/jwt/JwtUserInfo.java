@@ -11,5 +11,6 @@ public class JwtUserInfo {
 
     private Long seq;
     private String userId;
+    private String email;
     private Long companySeq;
 }

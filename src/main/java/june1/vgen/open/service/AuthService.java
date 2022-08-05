@@ -2,25 +2,27 @@ package june1.vgen.open.service;
 
 import june1.vgen.open.common.exception.auth.*;
 import june1.vgen.open.common.exception.client.MemberExistException;
+import june1.vgen.open.common.exception.client.NoSuchMemberException;
 import june1.vgen.open.common.jwt.JwtUserInfo;
 import june1.vgen.open.common.jwt.TokenProvider;
+import june1.vgen.open.controller.auth.dto.LoginResDto;
 import june1.vgen.open.controller.auth.dto.MemberResDto;
 import june1.vgen.open.controller.auth.dto.RegisterMemberReqDto;
-import june1.vgen.open.controller.auth.dto.TokenResDto;
+import june1.vgen.open.controller.auth.dto.Token;
 import june1.vgen.open.domain.Company;
 import june1.vgen.open.domain.Member;
-import june1.vgen.open.domain.RedisRefreshToken;
-import june1.vgen.open.domain.RefreshToken;
-import june1.vgen.open.domain.enumeration.Role;
+import june1.vgen.open.domain.RedisToken;
+import june1.vgen.open.domain.RedisUser;
 import june1.vgen.open.repository.CompanyRepository;
 import june1.vgen.open.repository.MemberRepository;
-import june1.vgen.open.repository.RefreshTokenRepository;
+import june1.vgen.open.repository.RedisTokenRepository;
+import june1.vgen.open.repository.RedisUserRepository;
+import june1.vgen.open.service.dto.TokenDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 
 import static june1.vgen.open.common.ConstantInfo.CODE_AUTH;
 import static june1.vgen.open.common.ConstantInfo.CODE_MEMBER;
@@ -37,8 +39,8 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final MemberRepository memberRepository;
     private final CompanyRepository companyRepository;
-    private final RefreshTokenRepository refreshTokenRepository;
-    private final RedisService redisService;
+    private final RedisUserRepository redisUserRepository;
+    private final RedisTokenRepository redisTokenRepository;
 
     /**
      * << 회원 생성하기 >>
@@ -52,7 +54,6 @@ public class AuthService {
      */
     @Transactional
     public MemberResDto register(RegisterMemberReqDto dto) {
-
         //1.해당 아이디의 회원이 이미 존재하는지 확인
         memberRepository.findByMemberId(dto.getMemberId())
                 .ifPresent(m -> {
@@ -81,7 +82,7 @@ public class AuthService {
                 .memberName(dto.getMemberName())
                 .email(dto.getEmail())
                 .phoneNum(dto.getPhoneNum())
-                .role(Role.valueOf(dto.getRole().name()))
+                .role(dto.getRole())
                 .company(company)
                 .inUse(true)
                 .build());
@@ -97,11 +98,9 @@ public class AuthService {
      * 1. 존재하는 회원인지 확인
      * 2. 사용 중지된 사용자가 아닌지 확인한다.
      * 3. 활성화된 사용자라면 패스워드를 통해 인증 과정을 진행한다.
-     * 4.인증 과정을 통과하면, 이미 토큰이 발급된 사용자가 아닌지 검사한다.
-     * - 토큰이 존재하지 않거나 redis 서버에 접속할 수 없으면 null 반환..
-     * - redis 가 다운되면 중복 로그인을 막을 수 없다.
+     * 4. 인증 과정을 통과하면, 이미 토큰이 발급된 사용자가 아닌지 검사한다.
      * 5. 토큰을 발급하여 redis 에 저장한다.
-     * 6. 리프레쉬 토큰을 갱신한다.
+     * 6. 리프레쉬 토큰을 redis 에 저장하거나 갱신한다.
      * 7. 토큰 데이터로 응답한다.
      *
      * @param userId
@@ -109,10 +108,9 @@ public class AuthService {
      * @return
      */
     @Transactional
-    public TokenResDto login(String userId, String password) {
-
+    public LoginResDto login(String userId, String password) {
         //1.존재하는 회원인지 확인한다.
-        Member member = memberRepository
+        Member m = memberRepository
                 .findByMemberId(userId)
                 .orElseThrow(() -> {
                     log.error("사용자=[{}] 로그인 요청, 존재하지 않는 회원", userId);
@@ -126,7 +124,7 @@ public class AuthService {
                 });
 
         //2.중지된 사용자가 아닌지 확인한다.
-        if (!member.getInUse()) {
+        if (!m.getInUse()) {
             log.error("사용자=[{}] 로그인 요청, 비활성화된 회원", userId);
             throw InactiveMemberException.builder()
                     .code(CODE_AUTH)
@@ -138,9 +136,9 @@ public class AuthService {
         }
 
         //3.활성화된 사용자라면 패스워드를 통해 인증 과정을 진행한다.
-        if (!passwordEncoder.matches(password, member.getPassword())) {
+        if (!passwordEncoder.matches(password, m.getPassword())) {
             log.error("사용자=[{}] 로그인 요청, 잘못된 패스워드=[{}]", userId, password);
-            throw WrongPasswordException.builder()
+            throw IllegalPasswordException.builder()
                     .code(CODE_AUTH)
                     .message("잘못된 패스워드입니다.")
                     .object(object)
@@ -150,128 +148,103 @@ public class AuthService {
         }
 
         //4.인증 과정을 통과하면, 이미 토큰이 발급된 사용자가 아닌지 검사한다.
-        //토큰이 존재하지 않거나 redis 서버에 접속할 수 없으면 null 반환..
-        //redis 가 다운되면 중복 로그인을 막을 수 없다.
-        String redisToken = redisService.getToken(member.getId());
-        if (StringUtils.hasText(redisToken)) {
-            log.error("사용자=[{}] 중복 로그인 요청", userId);
-            throw DupLoginException.builder()
-                    .code(CODE_AUTH)
-                    .message("중복 로그인을 시도하였습니다.")
-                    .object(object)
-                    .field("login().userId")
-                    .rejectedValue(userId)
-                    .build();
-        }
+        redisUserRepository
+                .findById(m.getId())
+                .ifPresent(m1 -> {
+                    log.error("사용자=[{}] 중복 로그인 요청", m1.getUserId());
+                    throw DuplicationLoginException.builder()
+                            .code(CODE_AUTH)
+                            .message("중복 로그인을 시도하였습니다.")
+                            .object(object)
+                            .field("login().userId")
+                            .rejectedValue(m1.getUserId())
+                            .build();
+                });
 
-        //5.토큰을 발급하고 저장한다.
-        //6.리프레쉬 토큰을 갱신한다.
-        return tokenProc(member);
+        //5.토큰을 발급하고 유저정보를 생성하여 redis 에 저장한다.
+        //6.리프레쉬 토큰을 redis 에 저장 혹은 갱신한다.
+        TokenDto token = tokenProc(m);
+
+        //7.응답 데이터를 생성 및 반환한다.
+        return getLoginResDto(token);
     }
 
     /**
      * << 토큰 재발급 >>
      * 1. 리프레쉬 토큰을 디크립트하여 회원 검증
-     * 2. 토큰에서 얻은 사용자의 고유번호로.. redis 에서 리프레쉬 토큰 조회
-     * 3. dto 로 전달된 리프레쉬 토큰과 사전에 등록된 리프레쉬 토큰이 일치하지 않으면 토큰 재발급 거부
-     * (사전에 발급된 리프레쉬 토큰으로만 토큰 재발급 가능)
-     * 4. 토큰 생성을 위해 DB 로부터 사용자 정보를 조회
-     * 5. 사용 중지된 사용자가 아닌지 확인한다.
-     * 6. 토큰을 발급하여 redis 에 저장한다.(덮어쓴다.)
-     * 7. 리프레쉬 토큰을 갱신한다.
+     * 2. 토큰에서 얻은 사용자의 고유번호로 redis 에서 리프레쉬 토큰 조회
+     * 3. 토큰 생성을 위해 DB 로부터 사용자 정보를 조회
+     * 4 .사용 중지된 사용자가 아닌지 확인한다.
+     * 5. 토큰을 발급하고 유저정보를 생성하여 redis 에 저장한다.
+     * 6. 리프레쉬 토큰을 redis 에 저장 혹은 갱신한다.
+     * 7. 응답 데이터를 생성 및 반환한다.
      *
-     * @param token : 리프레쉬 토큰
+     * @param refresh : 리프레쉬 토큰
      * @return
      */
     @Transactional
-    public TokenResDto reissue(String token) {
-
+    public LoginResDto reissue(String refresh) {
         //1.리프레쉬 토큰을 디크립트하여 회원 검증 (회원 고유번호 정보 획득)
-        //토큰이 올바르지 않다면 디크립트 과정에서 예외 발생..
-        JwtUserInfo user = (JwtUserInfo) tokenProvider
-                .getAuthentication(token)
-                .getPrincipal();
-
-        Long seq = user.getSeq();
-        if (seq == null) {
-            log.error("리프레쉬 토큰에 사용자의 고유번호 정보가 누락");
-            throw WrongTokenException.builder()
-                    .code(CODE_AUTH)
-                    .message("토큰에 필요한 정보가 누락되었습니다.")
-                    .object(object)
-                    .field("reissue().token")
-                    .rejectedValue(token)
-                    .build();
-        }
+        //토큰이 올바르지 않다면 디크립트 과정에서 서명 예외 발생..
+        Long seq = tokenProvider.decryptToken(refresh);
 
         //2.redis 에서 리프레쉬 토큰 조회
-        //redis 가 다운되거나 리프레쉬 토큰이 없으면 DB 에서 조회
-        //어디에도 리프레쉬 토큰이 존재하지 않으면 로그인 시도..
-        String refresh = redisService.getRefreshToken(seq)
-                .map(RedisRefreshToken::getToken)
-                .orElseGet(() -> refreshTokenRepository.findByMember_Id(seq)
-                        .map(RefreshToken::getToken)
-                        .orElseThrow(() -> {
-                            log.error("[{}]사용자의 리프레쉬 토큰이 존재하지 않음", seq);
-                            throw WrongTokenException.builder()
-                                    .code(CODE_AUTH)
-                                    .message("로그인을 시도하여 주십시오.")
-                                    .object(object)
-                                    .field("reissue().token")
-                                    .rejectedValue(token)
-                                    .build();
-                        }));
-
-
-        //3.dto 로 전달된 리프레쉬 토큰과 사전에 등록된 리프레쉬 토큰 비교
-        //일치하지 않으면 토큰 재발급 거부, 로그인 유도
-        if (refresh == null || !refresh.equals(token)) {
-            log.error("리프레쉬 토큰이 일치하지 않습니다.");
-            throw WrongTokenException.builder()
-                    .code(CODE_AUTH)
-                    .message("리프레쉬 토큰이 일치하지 않습니다.")
-                    .object(object)
-                    .field("reissue().token")
-                    .rejectedValue(token)
-                    .build();
-        }
-
-        //4.토큰 생성을 위해 DB 로부터 사용자 정보를 조회
-        Member member = memberRepository
+        //리프레쉬 토큰이 존재하지 않는다면 재로그인 필요..
+        redisTokenRepository
                 .findById(seq)
+                .map(RedisToken::getToken)
+                .filter(m -> m.equals(refresh))
                 .orElseThrow(() -> {
-                    log.error("사용자 고유번호=[{}] 토큰 재발급 요청, 존재하지 않는 회원", seq);
-                    return NoSuchMemberException.builder()
+                    log.error("[{}]사용자의 리프레쉬 토큰이 존재하지 않음 (혹은 일치하지 않음)", seq);
+                    throw ExpiredTokenException.builder()
                             .code(CODE_AUTH)
-                            .message("존재하지 않는 회원입니다.")
+                            .message("로그인을 시도하여 주십시오.")
                             .object(object)
                             .field("reissue().token")
-                            .rejectedValue(token)
+                            .rejectedValue(refresh)
                             .build();
                 });
 
-        //5.사용 중지된 사용자가 아닌지 확인한다.
-        if (!member.getInUse()) {
-            log.error("사용자 고유번호=[{}] 토큰 재발급 요청, 비활성화된 회원", seq);
+        //3.토큰 생성을 위해 DB 로부터 사용자 정보를 조회
+        //토큰에 담긴 사용자 고유번호로 사용자 조회 실패 (삭제된 유저)
+        //재로그인을 유도하기 위해 IllegalTokenException 예외를 사용..
+        Member m = memberRepository
+                .findById(seq)
+                .orElseThrow(() -> {
+                    log.error("[{}]사용자는 삭제되었음", seq);
+                    return IllegalTokenException.builder()
+                            .code(CODE_AUTH)
+                            .message("해당 사용자는 삭제되었습니다.")
+                            .object(object)
+                            .field("reissue().token")
+                            .rejectedValue(refresh)
+                            .build();
+                });
+
+        //4.사용 중지된 사용자가 아닌지 확인한다.
+        if (!m.getInUse()) {
+            log.error("[{}]사용자는 비활성화된 회원", seq);
             throw InactiveMemberException.builder()
                     .code(CODE_AUTH)
-                    .message("비활성화된 회원입니다.")
+                    .message("활동이 정지된 회원입니다.")
                     .object(object)
                     .field("reissue().token")
-                    .rejectedValue(token)
+                    .rejectedValue(refresh)
                     .build();
         }
 
-        //6.토큰을 발급하고 저장한다.
-        //7.리프레쉬 토큰을 갱신한다.
-        return tokenProc(member);
+        //5.토큰을 발급하고 유저정보를 생성하여 redis 에 저장한다.
+        //6.리프레쉬 토큰을 redis 에 저장 혹은 갱신한다.
+        TokenDto token = tokenProc(m);
+
+        //7.응답 데이터를 생성 및 반환한다.
+        return getLoginResDto(token);
     }
 
     /**
      * << 토큰 관련 정보 삭제 >>
      * 1. redis 에서 엑세스 토큰을 지운다.
      * 2. redis 에서 리프레쉬 토큰을 지운다.
-     * 3. DB 에서 리프레쉬 토큰을 지운다.
      *
      * @param user
      */
@@ -279,40 +252,50 @@ public class AuthService {
     public void logout(JwtUserInfo user) {
         //해당 계정의 정보를 모두 지운다.
         Long seq = user.getSeq();
-        redisService.delToken(seq);
-        redisService.delRefreshToken(seq);
-        refreshTokenRepository.deleteByMember_Id(seq);
+        redisUserRepository.deleteById(seq);
+        redisTokenRepository.deleteById(seq);
     }
 
-    private TokenResDto tokenProc(Member member) {
+    private TokenDto tokenProc(Member m) {
         //토큰 생성
-        TokenResDto resDto = tokenProvider.createToken(member);
-        String accessToken = resDto.getAccessToken();
-        String refreshToken = resDto.getRefreshToken();
+        Token token = tokenProvider.createToken(m);
+        String access = token.getAccessToken();
+        String refresh = token.getRefreshToken();
 
-        //액세스 토큰 저장
-        redisService.setToken(member.getId(), accessToken);
+        //redis 에 유저정보 및 토큰 저장
+        Company c = m.getCompany();
+        redisUserRepository.save(RedisUser.builder()
+                .id(m.getId())
+                .userId(m.getMemberId())
+                .email(m.getEmail())
+                .role(m.getRole())
+                .accessToken(access)
+                .companySeq(c != null ? c.getId() : null)
+                .companyType(c != null ? c.getCompanyType() : null)
+                .build());
 
-        //리프레쉬 토큰 엔티티 생성
         //redis 에 리프레쉬 토큰 저장
-        if (redisService.setRefreshToken(RedisRefreshToken.builder()
-                .id(member.getId())
-                .token(refreshToken)
-                .build()).isEmpty()) {
+        redisTokenRepository.save(RedisToken.builder()
+                .id(m.getId())
+                .token(refresh)
+                .build());
 
-            //redis 에 리프레쉬 토큰 저장 실패하면..
-            //DB 에 리프레쉬 토큰 저장
-            Long id = null;
-            if (member.getRefreshToken() != null) {
-                id = member.getRefreshToken().getId();
-            }
-            refreshTokenRepository.save(RefreshToken.builder()
-                    .id(id)
-                    .member(member)
-                    .token(resDto.getRefreshToken())
-                    .build());
-        }
+        //응답 데이터 생성
+        return TokenDto.builder()
+                .member(m)
+                .accessToken(access)
+                .refreshToken(refresh)
+                .build();
+    }
 
-        return resDto;
+    private LoginResDto getLoginResDto(TokenDto token) {
+        //토큰 발급 응답 데이터 생성
+        Company c = token.getMember().getCompany();
+        return LoginResDto.builder()
+                .accessToken(token.getAccessToken())
+                .refreshToken(token.getRefreshToken())
+                .role(token.getMember().getRole())
+                .companyType(c != null ? c.getCompanyType() : null)
+                .build();
     }
 }

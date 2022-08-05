@@ -10,16 +10,24 @@ import javax.persistence.Id;
 
 @Getter
 @Builder
-@RedisHash("user")
+@RedisHash(value = "user", timeToLive = 300)
 public class RedisUser {
 
     @Id
+    //사용자의 고유번호
     private Long id;
-    private String userId;
-    private String email;
-    private Role role;
+    //접근 토큰
     private String accessToken;
-    private String refreshToken;
-    private Long companySeq;
+
+    //사용자 권한
+    private Role role;
+    //소속 회사의 타입
     private Corp companyType;
+
+    //아이디
+    private String userId;
+    //이메일
+    private String email;
+    //소속 회사의 고유번호
+    private Long companySeq;
 }

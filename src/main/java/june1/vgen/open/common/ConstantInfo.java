@@ -6,7 +6,6 @@ public class ConstantInfo {
     // token
     //-----------------------
     public static final String SEQ = "seq";
-    public static final String MEMBER_ID = "member_id";
     public static final String COMPANY_SEQ = "company_seq";
     public static final String AUTH = "auth";
     public static final String COMMA = ",";

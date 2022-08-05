@@ -2,7 +2,8 @@ package june1.vgen.open.common.exception.auth;
 
 import lombok.Builder;
 
-public class InactiveMemberException extends AuthException {
+//비활성화 계정 로그인 예외
+public class InactiveMemberException extends WrongAuthException {
 
     public InactiveMemberException() {
     }

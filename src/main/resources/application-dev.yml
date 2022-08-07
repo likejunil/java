@@ -1,14 +1,20 @@
 spring:
 
+  redis:
+    host: localhost
+    port: 6379
+    password: qweQWE123!@#
+    timeout: 2000
+
   datasource:
-    url: jdbc:mariadb://localhost/OPEN
+    url: jdbc:mariadb://localhost/OPEN?characterEncoding=UTF-8
     username: june1
     password: qweQWE123!@#
     driver-class-name: org.mariadb.jdbc.Driver
 
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
     properties:
       hibernate:
         show_sql: true
@@ -58,6 +64,5 @@ server:
 
 jwt:
   secret: dmdlbl9zZWNyZXRfMDIwMV92Z2VuX3NlY3JldF8wMjAxdmdlbl9zZWNyZXRfMDIwMV92Z2VuX3NlY3JldF8wMjAxdmdlbl9zZWNyZXRfMDIwMV92Z2VuX3NlY3JldF8wMjAx
-  valid-seconds: 1800
-  refresh-seconds: 86400
-
+  valid-seconds: 300 # 지속시간 5분
+  refresh-seconds: 86400 # 지속시간 하루

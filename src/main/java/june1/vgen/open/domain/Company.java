@@ -30,6 +30,11 @@ public class Company extends CompanyCore {
         return this;
     }
 
+    public Company email(String email) {
+        this.email = email;
+        return this;
+    }
+
     public Company contactNum(String contactNum) {
         this.contactNum = contactNum;
         return this;

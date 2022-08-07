@@ -3,6 +3,7 @@ package june1.vgen.open.service.common;
 import lombok.Builder;
 import lombok.Getter;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 @Getter
 @Builder
@@ -25,6 +26,18 @@ public class PageInfo {
                 .size(page.getSize())
                 .totalElements(page.getTotalElements())
                 .totalPages(page.getTotalPages())
+                .build();
+    }
+
+    public static PageInfo empty(Pageable page) {
+        return PageInfo.builder()
+                .first(true)
+                .last(true)
+                .number(0)
+                .numberOfElements(0)
+                .size(page.getPageSize())
+                .totalElements(0)
+                .totalPages(0)
                 .build();
     }
 }

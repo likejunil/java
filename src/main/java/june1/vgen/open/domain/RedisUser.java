@@ -18,16 +18,27 @@ public class RedisUser {
     private Long id;
     //접근 토큰
     private String accessToken;
-
     //사용자 권한
     private Role role;
-    //소속 회사의 타입
-    private Corp companyType;
 
     //아이디
     private String userId;
     //이메일
     private String email;
+
+    //소속 회사의 타입
+    private Corp companyType;
     //소속 회사의 고유번호
     private Long companySeq;
+
+    public RedisUser role(Role role) {
+        this.role = role;
+        return this;
+    }
+
+    public RedisUser company(Long companySeq, Corp companyType) {
+        this.companyType = companyType;
+        this.companySeq = companySeq;
+        return this;
+    }
 }

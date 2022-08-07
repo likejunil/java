@@ -52,18 +52,6 @@ public class JwtFilter extends GenericFilterBean {
                 Authentication auth = tokenProvider.getAuthentication(token);
                 SecurityContextHolder.getContext().setAuthentication(auth);
                 JwtUserInfo user = (JwtUserInfo) auth.getPrincipal();
-
-                //redis 에 저장된 액세스 토큰을 검사..
-                //1.redis 가 다운되었거나 엑세스 토큰을 얻을 수 없다면 그냥 통과..
-                //2.redis 에서 얻은 토큰이 사용 불가로 변경되었다면 재로그인 유도..
-                if (!redisUserService.isValid(user.getSeq())) {
-                    log.info("{} {}=[{}]사용자의 토큰이 사용 불가 상태",
-                            filterLogPrefix, object, user.getUserId());
-                    HttpServletResponse res = (HttpServletResponse) response;
-                    res.sendError(SC_NOT_ACCEPTABLE, "토큰이 유효하지 않습니다.");
-                    return;
-                }
-
                 log.info("{} {}=Security Context 에 인증 정보가 저장되었음.", filterLogPrefix, object);
                 log.info("{} {}=[{}]님의 인가 권한={}",
                         filterLogPrefix, object, user.getUserId(),

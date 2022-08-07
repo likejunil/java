@@ -1,14 +1,14 @@
 package june1.vgen.open.controller.auth.dto;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 @Getter
-@AllArgsConstructor
+@NoArgsConstructor
 public class LoginReqDto {
 
     @NotBlank(message = "아이디는 필수 입력값 입니다.")

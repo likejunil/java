@@ -37,27 +37,27 @@ public class AuthController {
     /**
      * 로그인 (토큰 발급)
      *
-     * @param reqDto
+     * @param dto
      * @return
      */
     @PostMapping(URI_LOGIN)
     public Response<LoginResDto> login(
-            @Valid @RequestBody LoginReqDto reqDto) {
+            @Valid @RequestBody LoginReqDto dto) {
 
-        return Response.ok(authService.login(reqDto.getUserId(), reqDto.getPassword()));
+        return Response.ok(authService.login(dto.getUserId(), dto.getPassword()));
     }
 
     /**
      * 토큰 재발급 (리프레쉬 토큰 사용)
      *
-     * @param reqDto
+     * @param dto
      * @return
      */
     @PostMapping(URI_REISSUE)
     public Response<LoginResDto> reissue(
-            @Valid @RequestBody ReissueReqDto reqDto) {
+            @Valid @RequestBody ReissueReqDto dto) {
 
-        return Response.ok(authService.reissue(reqDto.getToken()));
+        return Response.ok(authService.reissue(dto.getToken()));
     }
 
     /**

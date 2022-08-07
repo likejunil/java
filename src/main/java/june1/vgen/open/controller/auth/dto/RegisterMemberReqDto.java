@@ -1,13 +1,12 @@
 package june1.vgen.open.controller.auth.dto;
 
-import june1.vgen.open.domain.enumeration.Role;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.*;
 
 @Getter
-@AllArgsConstructor
+@NoArgsConstructor
 public class RegisterMemberReqDto {
 
     @NotBlank(message = "아이디는 필수 입력값 입니다.")
@@ -32,9 +31,6 @@ public class RegisterMemberReqDto {
     @Size(min = 13, max = 13)
     @Pattern(regexp = "^[^ ][0-9\\-]*[^ ]$")
     private String phoneNum;
-
-    @NotNull
-    private Role role;
 
     @Positive
     private Long companySeq;

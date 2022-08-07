@@ -20,10 +20,8 @@ public class MemberListResDto {
     public static class MemberDto {
         private int no;
         private Long seq;
+        private Boolean inUse;
         private String memberId;
-        private String memberName;
-        private String email;
-        private String phoneNum;
         private String role;
     }
 }

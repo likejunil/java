@@ -1,21 +1,16 @@
 package june1.vgen.open.controller.company.dto;
 
-import june1.vgen.open.domain.enumeration.Corp;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-import javax.validation.constraints.*;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
 
 @Getter
 @AllArgsConstructor
 public class ModifyCompanyReqDto {
-
-    @NotNull
-    @Positive
-    private Long seq;
-
-    @NotBlank
-    private Corp companyType;
 
     @NotBlank
     @Size(min = 1, max = 32)

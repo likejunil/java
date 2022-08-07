@@ -41,4 +41,18 @@ public class Member extends MemberCore {
         this.company = company;
         return this;
     }
+
+    public Member handOver() {
+        return changeGrade(Role.ROLE_MANAGER);
+    }
+
+    public Member resign() {
+        return changeGrade(Role.ROLE_USER)
+                .company(null);
+    }
+
+    public Member changeGrade(Role role) {
+        this.role = role;
+        return this;
+    }
 }

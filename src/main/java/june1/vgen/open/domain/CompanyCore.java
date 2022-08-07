@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
 import javax.persistence.*;
+import java.util.List;
 
 @Getter
 @NoArgsConstructor
@@ -21,14 +22,18 @@ public abstract class CompanyCore extends BaseEntity {
     @Column(name = "seq")
     protected Long id;
 
-    protected String companyName;
+    @Enumerated(EnumType.STRING)
+    protected Corp companyType;
+
     protected String regiNum;
+    protected String companyName;
     protected String ceoName;
+    protected String email;
+    protected String contactNum;
     protected String zipCode;
     protected String address;
     protected String addressDetail;
-    protected String contactNum;
 
-    @Enumerated(EnumType.STRING)
-    protected Corp companyType;
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "company")
+    protected List<Member> members;
 }

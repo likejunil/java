@@ -1,7 +1,7 @@
 package june1.vgen.open.repository;
 
 import june1.vgen.open.domain.RedisToken;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.repository.CrudRepository;
 
-public interface RedisTokenRepository extends JpaRepository<RedisToken, Long> {
+public interface RedisTokenRepository extends CrudRepository<RedisToken, Long> {
 }

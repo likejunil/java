@@ -4,21 +4,19 @@ import june1.vgen.open.domain.enumeration.Corp;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Pattern;
-import javax.validation.constraints.Size;
+import javax.validation.constraints.*;
 
 @Getter
 @AllArgsConstructor
 public class RegisterCompanyReqDto {
 
+    @NotNull
+    private Corp companyType;
+
     @NotBlank
     @Size(min = 1, max = 32)
     @Pattern(regexp = "^[^ ][a-zA-Z0-9ㄱ-ㅎ가-힣 ]*[^ ]$")
     private String regiNum;
-
-    private Corp companyType;
 
     @NotBlank
     @Size(min = 1, max = 32)

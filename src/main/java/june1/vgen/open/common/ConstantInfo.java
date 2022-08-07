@@ -45,6 +45,7 @@ public class ConstantInfo {
     public static final String URI_JOIN = "/join";
     public static final String URI_REISSUE = "/reissue";
     public static final String URI_LOGOUT = "/logout";
+    public static final String URI_PASSWORD = "/password";
 
     //-----------------------
     // code
@@ -52,5 +53,11 @@ public class ConstantInfo {
     public static final String CODE_AUTH = "Auth";
     public static final String CODE_MEMBER = "Member";
     public static final String CODE_COMPANY = "Company";
+    public static final String CODE_REDIS = "Redis";
     public static final String CODE_DTO = "Dto";
+
+    //-----------------------
+    // query
+    //-----------------------
+    public static final int QUERY_SIZE_LIMIT = Integer.MAX_VALUE;
 }

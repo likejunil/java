@@ -4,15 +4,16 @@ import june1.vgen.open.common.exception.auth.*;
 import june1.vgen.open.common.exception.client.MemberExistException;
 import june1.vgen.open.common.exception.client.NoSuchMemberException;
 import june1.vgen.open.common.jwt.JwtUserInfo;
+import june1.vgen.open.common.jwt.Token;
 import june1.vgen.open.common.jwt.TokenProvider;
 import june1.vgen.open.controller.auth.dto.LoginResDto;
 import june1.vgen.open.controller.auth.dto.MemberResDto;
 import june1.vgen.open.controller.auth.dto.RegisterMemberReqDto;
-import june1.vgen.open.controller.auth.dto.Token;
 import june1.vgen.open.domain.Company;
 import june1.vgen.open.domain.Member;
 import june1.vgen.open.domain.RedisToken;
 import june1.vgen.open.domain.RedisUser;
+import june1.vgen.open.domain.enumeration.Role;
 import june1.vgen.open.repository.CompanyRepository;
 import june1.vgen.open.repository.MemberRepository;
 import june1.vgen.open.repository.RedisTokenRepository;
@@ -46,6 +47,7 @@ public class AuthService {
      * << 회원 생성하기 >>
      * 1. 해당 아이디의 회원이 이미 존재하는지 확인
      * 2. 이미 존재하는 회사에 소속할 경우 해당 회사가의 정보 조회
+     * 3. 회원의 권한 설정 (소속 회사가 없는 경우 관리자, 소속 회사가 있는 경우 일반 유저)
      * 3. 회원을 생성하고 저장
      * 4. 저장된 회원의 고유번호를 반환
      *
@@ -68,22 +70,27 @@ public class AuthService {
                 });
 
         //2.이미 존재하는 회사에 소속할 경우 해당 회사의 정보 조회
-        Company company = null;
+        Company c = null;
         if (dto.getCompanySeq() != null) {
-            company = companyRepository
+            c = companyRepository
                     .findById(dto.getCompanySeq())
                     .orElse(null);
         }
 
-        //3.회원을 생성하고 저장
+        //3.회원의 권한 설정
+        //다른 회사에 소속될 경우 일반 유저
+        Role role = Role.ROLE_ADMIN;
+        if (c != null) role = Role.ROLE_USER;
+
+        //4.회원을 생성하고 저장
         Member m = memberRepository.save(Member.builder()
                 .memberId(dto.getMemberId())
                 .password(passwordEncoder.encode(dto.getPassword()))
                 .memberName(dto.getMemberName())
                 .email(dto.getEmail())
                 .phoneNum(dto.getPhoneNum())
-                .role(dto.getRole())
-                .company(company)
+                .role(role)
+                .company(c)
                 .inUse(true)
                 .build());
 
@@ -148,6 +155,7 @@ public class AuthService {
         }
 
         //4.인증 과정을 통과하면, 이미 토큰이 발급된 사용자가 아닌지 검사한다.
+        //중복 로그인을 막는다.
         redisUserRepository
                 .findById(m.getId())
                 .ifPresent(m1 -> {

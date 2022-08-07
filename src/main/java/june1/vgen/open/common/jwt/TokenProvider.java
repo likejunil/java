@@ -5,7 +5,6 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import june1.vgen.open.common.exception.auth.ExpiredTokenException;
 import june1.vgen.open.common.exception.auth.IllegalTokenException;
-import june1.vgen.open.controller.auth.dto.Token;
 import june1.vgen.open.domain.Member;
 import june1.vgen.open.domain.RedisUser;
 import june1.vgen.open.repository.MemberRepository;

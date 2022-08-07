@@ -1,4 +1,4 @@
-package june1.vgen.open.controller.auth.dto;
+package june1.vgen.open.common.jwt;
 
 import lombok.Builder;
 import lombok.Getter;

@@ -7,5 +7,5 @@ import lombok.Getter;
 @Builder
 public class CompanyResDto {
 
-    private Long seq;
+    private Long companySeq;
 }

@@ -34,7 +34,4 @@ public abstract class MemberCore extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "company_seq")
     protected Company company;
-
-    @OneToOne(fetch = FetchType.LAZY, mappedBy = "member")
-    protected RefreshToken refreshToken;
 }

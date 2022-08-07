@@ -12,6 +12,7 @@ public class QueryCompanyResDto {
     private Corp companyType;
     private String companyName;
     private String ceoName;
+    private String email;
     private String contactNum;
     private String zipCode;
     private String address;

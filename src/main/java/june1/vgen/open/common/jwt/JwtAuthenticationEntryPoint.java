@@ -18,6 +18,7 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
             AuthenticationException authException) throws IOException {
 
         //로그인을 하지 못해서 인증이 되지 않은 경우..
-        response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+        response.sendError(HttpServletResponse.SC_UNAUTHORIZED,
+                "인증에 실패하였습니다.");
     }
 }

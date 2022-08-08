@@ -4,7 +4,6 @@ import june1.vgen.open.common.filter.JwtFilter;
 import june1.vgen.open.common.jwt.JwtAccessDeniedHandler;
 import june1.vgen.open.common.jwt.JwtAuthenticationEntryPoint;
 import june1.vgen.open.common.jwt.TokenProvider;
-import june1.vgen.open.service.RedisUserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
@@ -25,7 +24,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import static june1.vgen.open.common.ConstantInfo.*;
-import static org.springframework.http.HttpMethod.POST;
+import static org.springframework.http.HttpMethod.GET;
 
 @Slf4j
 @Configuration
@@ -40,7 +39,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private final TokenProvider tokenProvider;
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
-    private final RedisUserService redisUserService;
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -60,7 +58,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
         //JWT 필터를 적용
-        http.addFilterBefore(new JwtFilter(tokenProvider, redisUserService),
+        http.addFilterBefore(
+                new JwtFilter(tokenProvider),
                 UsernamePasswordAuthenticationFilter.class);
 
         //인증(정체 확인) 예외처리, 인가(자원 접근) 예외처리 등록
@@ -69,10 +68,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .accessDeniedHandler(jwtAccessDeniedHandler);
 
         http.authorizeRequests()
-                .antMatchers(POST, "/auth/**").permitAll()
+                //인증 관련 허가
+                .antMatchers("/auth/**").permitAll()
+                //회원 관련 허가
                 .antMatchers("/member/**").authenticated()
+                //회사 관련 허가
+                .antMatchers(GET, "/company/**").permitAll()
                 .antMatchers("/company/**").authenticated()
-                .anyRequest().authenticated();
+                //그 외의 모든 접근에 대하여..
+                .anyRequest().anonymous();
     }
 
     @Bean

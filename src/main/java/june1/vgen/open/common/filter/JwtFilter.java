@@ -1,8 +1,9 @@
 package june1.vgen.open.common.filter;
 
+import june1.vgen.open.common.exception.auth.ExpiredTokenException;
+import june1.vgen.open.common.exception.auth.IllegalTokenException;
 import june1.vgen.open.common.jwt.JwtUserInfo;
 import june1.vgen.open.common.jwt.TokenProvider;
-import june1.vgen.open.service.RedisUserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
@@ -29,9 +30,7 @@ import static june1.vgen.open.common.filter.FilterConstant.filterLogPrefix;
 public class JwtFilter extends GenericFilterBean {
 
     private static final String object = "JwtFilter";
-
     private final TokenProvider tokenProvider;
-    private final RedisUserService redisUserService;
 
     @Override
     public void doFilter(
@@ -40,6 +39,7 @@ public class JwtFilter extends GenericFilterBean {
             FilterChain chain) throws IOException, ServletException {
 
         HttpServletRequest req = (HttpServletRequest) request;
+        HttpServletResponse res = (HttpServletResponse) response;
         String token = resolveToken(req);
         //---------------------------------
         // 토큰이 존재할 때..
@@ -49,7 +49,24 @@ public class JwtFilter extends GenericFilterBean {
             // 토큰이 유효할 때..
             //---------------------------------
             if (tokenProvider.isValidToken(token)) {
-                Authentication auth = tokenProvider.getAuthentication(token);
+                Authentication auth = null;
+                try {
+                    auth = tokenProvider.getAuthentication(token);
+                }
+                //redis 서버에 해당 토큰과 관련된 정보가 없음..
+                catch (ExpiredTokenException e) {
+                    if (!req.getRequestURI().equals(URI_AUTH + URI_LOGOUT)) throw e;
+                    log.error("redis 서버에 토큰 정보가 없음에도 로그아웃을 시도함");
+                    //그냥 다음으로 정상 진행, logout 서비스..
+                    chain.doFilter(request, response);
+                    return;
+                }
+                //토큰에 필수로 포함되어야 할 정보가 누락되었음..
+                catch (IllegalTokenException e) {
+                    res.sendError(SC_NOT_ACCEPTABLE, "토큰이 유효하지 않습니다.");
+                    return;
+                }
+
                 SecurityContextHolder.getContext().setAuthentication(auth);
                 JwtUserInfo user = (JwtUserInfo) auth.getPrincipal();
                 log.info("{} {}=Security Context 에 인증 정보가 저장되었음.", filterLogPrefix, object);
@@ -68,8 +85,10 @@ public class JwtFilter extends GenericFilterBean {
             else {
                 log.info("{} {}=토큰이 유효하지 않습니다.", filterLogPrefix, object);
                 String uri = req.getRequestURI();
-                if (!uri.equals(URI_AUTH + URI_REISSUE) && !uri.equals(URI_AUTH + URI_LOGIN)) {
-                    HttpServletResponse res = (HttpServletResponse) response;
+                if (!uri.equals(URI_AUTH + URI_LOGIN)
+                        && !uri.equals(URI_AUTH + URI_REISSUE)
+                        && !uri.equals(URI_AUTH + URI_LOGOUT)) {
+
                     res.sendError(SC_NOT_ACCEPTABLE, "토큰이 유효하지 않습니다.");
                     return;
                 }

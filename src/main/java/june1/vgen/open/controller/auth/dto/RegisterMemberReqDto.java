@@ -28,7 +28,7 @@ public class RegisterMemberReqDto {
     @Email(message = "이메일 형식을 입력해야 합니다.")
     private String email;
 
-    @Size(min = 13, max = 13)
+    @Size(min = 9, max = 13)
     @Pattern(regexp = "^[^ ][0-9\\-]*[^ ]$")
     private String phoneNum;
 

@@ -67,10 +67,9 @@ public class AuthController {
      * @return
      */
     @GetMapping(URI_LOGOUT)
-    public Response<?> logout(
+    public Response<MemberResDto> logout(
             @AuthenticationPrincipal JwtUserInfo user) {
 
-        authService.logout(user);
-        return Response.ok(null);
+        return Response.ok(authService.logout(user));
     }
 }

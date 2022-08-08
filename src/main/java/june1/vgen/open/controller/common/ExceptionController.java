@@ -18,6 +18,7 @@ import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -40,14 +41,15 @@ public class ExceptionController {
                 .body(Response.error(null, bindingResult, messageSource));
     }
 
-    //요청 dto 에 enum 이 포함되어 있을 때..
-    //해당 enum 의 데이터가 아닌 잘못된 데이터로 dto 에 담아 요청했을 경우..
-    //다음과 같이 HttpMessageNotReadableException 이 발생한다.
-    @ExceptionHandler
+    //요청 dto 에 enum 이 포함되어 있을 때, 잘못된 데이터로 enum 에 담으려는 경우..
+    //또는 dto 에 담을 값이 타입이 맞지 않는 경우..
+    @ExceptionHandler({
+            MethodArgumentTypeMismatchException.class,
+            HttpMessageNotReadableException.class})
     protected ResponseEntity<Response> handleHttpMessageNotReadableException(
-            HttpMessageNotReadableException e, HttpServletRequest req) {
+            Exception e, HttpServletRequest req) {
         log.error("요청 DTO 의 정보를 읽지 못했습니다.[{}]", req.getRequestURI());
-        String message = e.getMessage() != null ? e.getMessage().split(":")[0] : null;
+        String message = e.getMessage() != null ? e.getMessage().split("[:;,]")[0] : null;
         return ResponseEntity.badRequest()
                 .body(Response.error(null, Error.builder()
                         .code(CODE_DTO)
@@ -62,7 +64,7 @@ public class ExceptionController {
     protected ResponseEntity<Response> handlePropertyReferenceException(
             PropertyReferenceException e, HttpServletRequest req) {
         log.error("요청하신 데이터에 대한 정렬 기준이 명확하지 않습니다.[{}]", req.getRequestURI());
-        String message = e.getMessage() != null ? e.getMessage().split(":")[0] : null;
+        String message = e.getMessage() != null ? e.getMessage().split("[:;,]")[0] : null;
         return ResponseEntity.badRequest()
                 .body(Response.error(null, Error.builder()
                         .code(CODE_DTO)

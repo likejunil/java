@@ -8,8 +8,10 @@ import lombok.Getter;
 @Builder
 public class SearchCompanyCond {
 
+    private Long memberSeq;
     private Long companySeq;
     private Corp companyType;
     private String companyName;
+    private String regexCompanyName;
     private String ceoName;
 }

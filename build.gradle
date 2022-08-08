@@ -37,6 +37,7 @@ dependencies {
     //querydsl 설정 추가
     implementation "com.querydsl:querydsl-jpa:${queryDslVersion}"
     implementation "com.querydsl:querydsl-apt:${queryDslVersion}"
+    implementation "com.querydsl:querydsl-core:${queryDslVersion}"
 
     runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'
 

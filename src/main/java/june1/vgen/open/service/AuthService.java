@@ -257,11 +257,18 @@ public class AuthService {
      * @param user
      */
     @Transactional
-    public void logout(JwtUserInfo user) {
+    public MemberResDto logout(JwtUserInfo user) {
         //해당 계정의 정보를 모두 지운다.
-        Long seq = user.getSeq();
-        redisUserRepository.deleteById(seq);
-        redisTokenRepository.deleteById(seq);
+        if (user != null) {
+            Long seq = user.getSeq();
+            redisUserRepository.deleteById(seq);
+            redisTokenRepository.deleteById(seq);
+        }
+
+        //응답 데이터 생성 및 반환
+        return MemberResDto.builder()
+                .seq(user != null ? user.getSeq() : null)
+                .build();
     }
 
     private TokenDto tokenProc(Member m) {
@@ -300,6 +307,7 @@ public class AuthService {
         //토큰 발급 응답 데이터 생성
         Company c = token.getMember().getCompany();
         return LoginResDto.builder()
+                .seq(token.getMember().getId())
                 .accessToken(token.getAccessToken())
                 .refreshToken(token.getRefreshToken())
                 .role(token.getMember().getRole())

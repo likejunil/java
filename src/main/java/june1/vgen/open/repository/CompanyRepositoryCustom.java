@@ -2,10 +2,10 @@ package june1.vgen.open.repository;
 
 import june1.vgen.open.domain.Company;
 import june1.vgen.open.repository.dto.SearchCompanyCond;
-
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface CompanyRepositoryCustom {
 
-    List<Company> findByCond(SearchCompanyCond cond);
+    Page<Company> findByCond(SearchCompanyCond cond, Pageable pageable);
 }

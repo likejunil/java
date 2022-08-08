@@ -17,17 +17,15 @@ import june1.vgen.open.service.common.PageInfo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import static java.util.stream.Collectors.toList;
-import static june1.vgen.open.common.ConstantInfo.CODE_COMPANY;
-import static june1.vgen.open.common.ConstantInfo.CODE_MEMBER;
+import static june1.vgen.open.common.ConstantInfo.*;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -48,14 +46,14 @@ public class CompanyService {
      * @param pageable
      * @return
      */
-    public CompanyListResDto list(Pageable pageable) {
-
+    public CompanyListResDto list(CompanyListReqDto dto, Pageable pageable) {
         //회사 목록 전체 조회
-        Page<Company> ret = companyRepository.findAll(pageable);
+        Page<Company> ret = getCompany(null, null, dto.getName(), pageable);
 
         //DTO 생성
         IncreaseNoUtil no = new IncreaseNoUtil();
         List<CompanyListResDto.CompanyDto> list = ret
+                .getContent()
                 .stream()
                 .map(m -> CompanyListResDto.CompanyDto.builder()
                         .no(no.get())
@@ -82,7 +80,7 @@ public class CompanyService {
     public QueryCompanyResDto query(Long seq) {
         //회사 조회하기
         //조회하려는 회사가 존재하지 않을 경우 예외 발생..
-        Company c = getCompany(null, seq, true).get(0);
+        Company c = getCompany(seq, true).getContent().get(0);
 
         //응답 데이터 생성
         return QueryCompanyResDto.builder()
@@ -107,22 +105,37 @@ public class CompanyService {
      */
     @Transactional
     public CompanyResDto register(JwtUserInfo user, RegisterCompanyReqDto dto) {
-        //이미 회사를 소유하고 있는지 확인
+        //이미 회사에 소속되어 있는지 확인..
         Member m = memberService
                 .getMember(user.getSeq(), null, true)
-                .getContent().get(0);
+                .getContent()
+                .get(0);
 
         if (m.getCompany() != null) {
             log.error("[{}]사용자는 이미 [{}]회사를 소유하고 있음",
                     user.getUserId(), m.getCompany().getCompanyName());
             throw CompanyExistException.builder()
                     .code(CODE_COMPANY)
-                    .message("사용자는 이미 회사를 소유하고 있습니다.")
+                    .message("사용자는 이미 회사에 등록되어 있습니다.")
                     .object(object)
                     .field("register().user.companySeq")
                     .rejectedValue(user.getCompanySeq().toString())
                     .build();
         }
+
+        //해당 회사의 유니크 속성인 회사 등록번호 중복 여부 검사
+        companyRepository.findByRegiNum(dto.getRegiNum())
+                .ifPresent(c -> {
+                    log.error("회사 등록번호[{}]는 이미 [{}]에서 사용하고 있음 ",
+                            c.getRegiNum(), c.getCompanyName());
+                    throw CompanyExistException.builder()
+                            .code(CODE_COMPANY)
+                            .message("이미 사용 중인 회사 등록번호 입니다.")
+                            .object(object)
+                            .field("register().dto.regiNum")
+                            .rejectedValue(dto.getRegiNum())
+                            .build();
+                });
 
         //회사 생성 및 저장
         Company c = companyRepository.save(Company.builder()
@@ -138,7 +151,10 @@ public class CompanyService {
                 .build());
 
         //관리자를 회사에 등록
-        m = memberRepository.save(m.company(c));
+        m = memberRepository.save(m.company(c).role(Role.ROLE_ADMIN));
+
+        //redis 서버에 등록
+        redisUserService.changeCompany(m, c);
 
         //응답 데이터 생성, 회사 고유번호 반환
         return CompanyResDto.builder()
@@ -197,7 +213,17 @@ public class CompanyService {
      * @param seq
      * @return
      */
+    @Transactional
     public CompanyResDto join(JwtUserInfo user, Long seq) {
+        //이미 가입되어 있는 회사에 가입하려는 경우..
+        if (user.getCompanySeq() != null) {
+            if (user.getCompanySeq().equals(seq)) {
+                return CompanyResDto.builder()
+                        .companySeq(user.getCompanySeq())
+                        .build();
+            }
+        }
+
         //이미 가입되어 있는 회사가 있는지 확인
         Member m = memberService
                 .getMember(user.getSeq(), null, true)
@@ -217,9 +243,9 @@ public class CompanyService {
         }
 
         //가입할 회사를 조회하고..
-        //회사에 가입한다.
-        Company c = getCompany(null, seq, true).get(0);
-        m = memberRepository.save(m.company(c));
+        //회사에 가입한다.(일반 유저)
+        Company c = getCompany(seq, true).getContent().get(0);
+        m = memberRepository.save(m.company(c).changeGrade(Role.ROLE_USER));
 
         //소속된 회사 정보가 변경되었으므로 redis 서버에 반영한다.
         RedisUser u = redisUserService.changeCompany(m, c);
@@ -236,6 +262,7 @@ public class CompanyService {
      * @param user
      * @return
      */
+    @Transactional
     public CompanyResDto resign(JwtUserInfo user) {
         //소속된 회사가 존재하는지 확인
         Member m = memberService
@@ -279,30 +306,48 @@ public class CompanyService {
                 .build();
     }
 
-    public List<Company> getCompany(Long memberSeq, Long companySeq) {
-        return getCompany(memberSeq, companySeq, false);
+    public Page<Company> getCompany(Long companySeq) {
+        return getCompany(companySeq, false);
     }
 
-    public List<Company> getCompany(Long memberSeq, Long companySeq, boolean e) {
+    public Page<Company> getCompany(Long companySeq, Long memberSeq) {
+        return getCompany(companySeq, memberSeq, false);
+    }
+
+    public Page<Company> getCompany(Long companySeq, Long memberSeq, String regexCompanyName) {
+        return getCompany(companySeq, memberSeq, regexCompanyName, false);
+    }
+
+    public Page<Company> getCompany(Long companySeq, Long memberSeq, String regexCompanyName, Pageable pageable) {
+        return getCompany(companySeq, memberSeq, regexCompanyName, pageable, false);
+    }
+
+    public Page<Company> getCompany(Long companySeq, boolean e) {
+        return getCompany(companySeq, null, e);
+    }
+
+    public Page<Company> getCompany(Long companySeq, Long memberSeq, boolean e) {
+        return getCompany(companySeq, memberSeq, null, e);
+    }
+
+    public Page<Company> getCompany(Long companySeq, Long memberSeq, String regexCompanyName, boolean e) {
+        return getCompany(companySeq, memberSeq, regexCompanyName, PageRequest.of(0, QUERY_SIZE_LIMIT), e);
+    }
+
+    public Page<Company> getCompany(
+            Long companySeq, Long memberSeq, String regexCompanyName, Pageable pageable, boolean e) {
         //검색할 조건을 생성
         SearchCompanyCond cond = SearchCompanyCond.builder()
+                .memberSeq(memberSeq)
                 .companySeq(companySeq)
+                .regexCompanyName(regexCompanyName)
                 .build();
 
         //회사를 검색한 후 회원 조건 필터링
-        List<Company> l = companyRepository.findByCond(cond);
-        if (l.size() > 0 && memberSeq != null) {
-            Set<Company> s = new HashSet<>();
-            l.forEach(c -> {
-                if (c.getMembers().stream().anyMatch(m -> m.getId().equals(memberSeq)))
-                    s.add(c);
-            });
-
-            l = List.copyOf(s);
-        }
+        Page<Company> l = companyRepository.findByCond(cond, pageable);
 
         //파라미터 조건에 따라 예외 발생 선택
-        if (l.isEmpty()) {
+        if (l.getContent().isEmpty()) {
             log.error("사용자=[{}] 회사=[{}] 조건의 회사가 존재하지 않음", memberSeq, companySeq);
             if (e) {
                 throw NoSuchCompanyException.builder()

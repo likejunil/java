@@ -36,6 +36,10 @@ public class RedisUser {
         return this;
     }
 
+    public RedisUser handOver() {
+        return role(Role.ROLE_MANAGER);
+    }
+
     public RedisUser company(Long companySeq, Corp companyType) {
         this.companyType = companyType;
         this.companySeq = companySeq;

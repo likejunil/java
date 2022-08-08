@@ -9,6 +9,7 @@ import lombok.Getter;
 @Builder
 public class LoginResDto {
 
+    private Long seq;
     private String accessToken;
     private String refreshToken;
     private Role role;

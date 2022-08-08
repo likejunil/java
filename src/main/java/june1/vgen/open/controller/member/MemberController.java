@@ -44,6 +44,7 @@ public class MemberController {
     /**
      * 특정 회원의 정보를 조회하기
      * 모든 회원들이 조회할 수 있음..
+     * 같은 회사에 소속된 회원들만 조회 가능..
      *
      * @param id
      * @param user

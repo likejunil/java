@@ -18,6 +18,7 @@ public class JwtAccessDeniedHandler implements AccessDeniedHandler {
             AccessDeniedException accessDeniedException) throws IOException {
 
         //로그인은 했지만 인가되지 않은 자원에 접근했을 경우..
-        response.sendError(HttpServletResponse.SC_FORBIDDEN);
+        response.sendError(HttpServletResponse.SC_FORBIDDEN,
+                "해당 자원에 대한 접근 권한이 부족합니다.");
     }
 }

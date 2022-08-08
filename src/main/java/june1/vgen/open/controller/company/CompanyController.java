@@ -13,6 +13,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 
 import static org.springframework.data.domain.Sort.Direction.DESC;
 
@@ -33,9 +34,10 @@ public class CompanyController {
      */
     @GetMapping
     public Response<CompanyListResDto> list(
-            @PageableDefault(page = 0, size = 100, sort = {"id"}, direction = DESC) Pageable pageable) {
+            @PageableDefault(page = 0, size = 100, sort = {"id"}, direction = DESC) Pageable pageable,
+            @Valid @ModelAttribute CompanyListReqDto dto) {
 
-        return Response.ok(companyService.list(pageable));
+        return Response.ok(companyService.list(dto, pageable));
     }
 
     /**
@@ -54,14 +56,12 @@ public class CompanyController {
 
     /**
      * 회사를 생성하기
-     * 관리자만이 회사를 생성할 수 있음..
      *
      * @param user
      * @param dto
      * @return
      */
     @PostMapping
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public Response<CompanyResDto> register(
             @AuthenticationPrincipal JwtUserInfo user,
             @Valid @RequestBody RegisterCompanyReqDto dto) {
@@ -95,21 +95,24 @@ public class CompanyController {
      * @return
      */
     @PostMapping("/{id}")
+    @PreAuthorize("isAuthenticated()")
     public Response<CompanyResDto> join(
             @AuthenticationPrincipal JwtUserInfo user,
-            @PathVariable Long id) {
+            @NotNull @PathVariable Long id) {
 
         return Response.ok(companyService.join(user, id));
     }
 
     /**
-     * 회사를 사임한다.
+     * 회사를 사퇴한다.
      * 회사에 소속된 회원만 가능하다.
+     * 회사를 떠나면 일반 유저로 변경된다.
      *
      * @param user
      * @return
      */
     @DeleteMapping("/member")
+    @PreAuthorize("isAuthenticated()")
     public Response<CompanyResDto> resign(
             @AuthenticationPrincipal JwtUserInfo user) {
 

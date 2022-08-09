@@ -7,6 +7,7 @@ import com.querydsl.core.types.dsl.PathBuilder;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import june1.vgen.open.domain.Member;
+import june1.vgen.open.domain.QAttachmentFile;
 import june1.vgen.open.domain.QCompany;
 import june1.vgen.open.domain.QMember;
 import june1.vgen.open.repository.dto.SearchMemberCond;
@@ -30,6 +31,7 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
         //큐클래스 사용
         QMember m = QMember.member;
         QCompany c = QCompany.company;
+        QAttachmentFile f = QAttachmentFile.attachmentFile;
 
         //조건 생성
         BooleanBuilder builder = new BooleanBuilder();
@@ -42,8 +44,8 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
         JPAQuery<Member> query = factory
                 .select(m)
                 .from(m)
-                .leftJoin(m.company, c)
-                .fetchJoin()
+                .leftJoin(m.company, c).fetchJoin()
+                .leftJoin(m.image, f).fetchJoin()
                 .where(builder);
 
         //총 개수

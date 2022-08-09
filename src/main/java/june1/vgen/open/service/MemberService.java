@@ -4,12 +4,15 @@ import june1.vgen.open.common.exception.auth.IllegalChangeGradeException;
 import june1.vgen.open.common.exception.client.NoSuchCompanyException;
 import june1.vgen.open.common.exception.client.NoSuchMemberException;
 import june1.vgen.open.common.jwt.JwtUserInfo;
+import june1.vgen.open.common.util.FileUtil;
 import june1.vgen.open.common.util.IncreaseNoUtil;
 import june1.vgen.open.controller.auth.dto.MemberResDto;
 import june1.vgen.open.controller.member.dto.*;
+import june1.vgen.open.domain.AttachmentFile;
 import june1.vgen.open.domain.Member;
 import june1.vgen.open.domain.RedisUser;
 import june1.vgen.open.domain.enumeration.Role;
+import june1.vgen.open.repository.AttachmentFileRepository;
 import june1.vgen.open.repository.MemberRepository;
 import june1.vgen.open.repository.RedisUserRepository;
 import june1.vgen.open.repository.dto.SearchMemberCond;
@@ -22,6 +25,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,6 +41,8 @@ public class MemberService {
     private final static String object = "MemberService";
     private final MemberRepository memberRepository;
     private final RedisUserRepository redisUserRepository;
+    private final AttachmentFileRepository attachmentFileRepository;
+    private final FileUtil fileUtil;
 
     /**
      * 자신이 속한 회사의 소속 직원들 목록을 조회하기
@@ -116,10 +122,28 @@ public class MemberService {
      * @return
      */
     @Transactional
-    public MemberResDto modify(JwtUserInfo user, ModifyMemberReqDto dto) {
+    public MemberResDto modify(JwtUserInfo user, ModifyMemberReqDto dto) throws IOException {
         //자신의 고유번호로 자신의 정보를 조회(권한 확인)
         //존재하지 않는 회원이면 예외 발생..
         Member m = getMember(user.getSeq(), null, true).getContent().get(0);
+
+        //새로운 사진을 올렸다면.. 기존의 사진을 지우고 새로운 사진으로 대체..
+        //아무것도 올리지 않았다면.. 기존의 사진을 유지..
+        if (dto.getImage() != null && !dto.getImage().isEmpty()) {
+            AttachmentFile f = attachmentFileRepository.save(fileUtil
+                    .saveFile(dto.getImage(), MEMBER_IMAGE_FILE_PATH)
+                    .toAttachmentFile());
+
+            log.info("사용자[{}]의 파일을 새롭게 교체했습니다.[{}]=>[{}]",
+                    user.getUserId(), m.getImage().getId(), f.getId());
+
+            //이미지 교체
+            AttachmentFile old = m.getImage();
+            if (old != null) {
+                attachmentFileRepository.save(old.delete());
+            }
+            m.changeImage(f);
+        }
 
         //자신의 정보를 수정하고 저장
         m = memberRepository.save(m

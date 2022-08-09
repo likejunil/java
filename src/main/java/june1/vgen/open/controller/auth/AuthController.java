@@ -10,6 +10,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.io.IOException;
 
 import static june1.vgen.open.common.ConstantInfo.*;
 
@@ -29,7 +30,7 @@ public class AuthController {
      */
     @PostMapping(URI_JOIN)
     public Response<MemberResDto> register(
-            @Valid @RequestBody RegisterMemberReqDto dto) {
+            @Valid @ModelAttribute RegisterMemberReqDto dto) throws IOException {
 
         return Response.ok(authService.register(dto));
     }

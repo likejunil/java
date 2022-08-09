@@ -2,9 +2,12 @@ package june1.vgen.open.controller.auth.dto;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.constraints.*;
 
+@Setter
 @Getter
 @NoArgsConstructor
 public class RegisterMemberReqDto {
@@ -34,4 +37,6 @@ public class RegisterMemberReqDto {
 
     @Positive
     private Long companySeq;
+
+    private MultipartFile image;
 }

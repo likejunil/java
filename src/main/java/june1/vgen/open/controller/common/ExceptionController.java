@@ -9,6 +9,8 @@ import june1.vgen.open.common.exception.client.ClientException;
 import june1.vgen.open.common.exception.server.ServerException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.tomcat.util.http.fileupload.impl.FileSizeLimitExceededException;
+import org.apache.tomcat.util.http.fileupload.impl.SizeLimitExceededException;
 import org.springframework.context.MessageSource;
 import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
@@ -69,6 +71,30 @@ public class ExceptionController {
                 .body(Response.error(null, Error.builder()
                         .code(CODE_DTO)
                         .defaultMessage(message)
+                        .build()));
+    }
+
+    //파일 업로드의 경우 파일 사이즈 제한을 벗어났을 때..
+    @ExceptionHandler
+    protected ResponseEntity<Response> handleFileSizeLimitExceeded(
+            FileSizeLimitExceededException e, HttpServletRequest req) {
+        log.error("업로드 하려는 파일의 사이즈가 크기 제한을 초과하였습니다.[{}]", req.getRequestURI());
+        return ResponseEntity.badRequest()
+                .body(Response.error(null, Error.builder()
+                        .code(CODE_DTO)
+                        .defaultMessage("업로드 하려는 파일의 사이즈가 크기 제한을 초과하였습니다.")
+                        .build()));
+    }
+
+    //서비스 요청의 전체 크기가 제한 조건을 넘었을 때..
+    @ExceptionHandler
+    protected ResponseEntity<Response> handleFileSizeLimitExceeded(
+            SizeLimitExceededException e, HttpServletRequest req) {
+        log.error("서비스 요청의 크기가 크기 제한을 초과하였습니다.[{}]", req.getRequestURI());
+        return ResponseEntity.badRequest()
+                .body(Response.error(null, Error.builder()
+                        .code(CODE_DTO)
+                        .defaultMessage("서비스 요청의 크기가 크기 제한을 초과하였습니다.")
                         .build()));
     }
 

@@ -34,4 +34,8 @@ public abstract class MemberCore extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "company_seq")
     protected Company company;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "image_seq")
+    protected AttachmentFile image;
 }

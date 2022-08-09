@@ -40,6 +40,13 @@ spring:
   messages:
     basename: messages, errors
 
+  servlet:
+    multipart:
+      # 업로드하려는 각각의 파일 크기 제한
+      max-file-size: 4MB
+      # 한 번의 요청이 가질 수 있는 사이즈 제한
+      max-request-size: 8MB
+
 logging.level:
   org.hibernate.SQL: info
   org.hibernate.type: info
@@ -64,5 +71,5 @@ server:
 
 jwt:
   secret: dmdlbl9zZWNyZXRfMDIwMV92Z2VuX3NlY3JldF8wMjAxdmdlbl9zZWNyZXRfMDIwMV92Z2VuX3NlY3JldF8wMjAxdmdlbl9zZWNyZXRfMDIwMV92Z2VuX3NlY3JldF8wMjAx
-  valid-seconds: 300 # 지속시간 5분
+  valid-seconds: 3600 # 지속시간 60분
   refresh-seconds: 86400 # 지속시간 하루

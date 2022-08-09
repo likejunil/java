@@ -14,6 +14,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.io.IOException;
 
 import static org.springframework.data.domain.Sort.Direction.DESC;
 
@@ -62,16 +63,18 @@ public class MemberController {
      * 자신의 정보를 수정하기
      * 등급은 수정할 수 없음..
      *
-     * @param dto
+     * @param reqDto
      * @param user
      * @return
      */
     @PutMapping
     public Response<MemberResDto> modify(
-            @Valid @RequestBody ModifyMemberReqDto dto,
-            @AuthenticationPrincipal JwtUserInfo user) {
+            @Valid @ModelAttribute ModifyMemberReqDto reqDto,
+            @Valid @RequestPart FriendsDto friendsDto,
+            @AuthenticationPrincipal JwtUserInfo user) throws IOException {
 
-        return Response.ok(memberService.modify(user, dto));
+        friendsDto.getList().forEach(m -> log.info("[{}]", m));
+        return Response.ok(memberService.modify(user, reqDto));
     }
 
     /**

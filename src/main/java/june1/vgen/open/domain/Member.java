@@ -55,4 +55,9 @@ public class Member extends MemberCore {
         this.role = role;
         return this;
     }
+
+    public Member changeImage(AttachmentFile image) {
+        this.image = image;
+        return this;
+    }
 }

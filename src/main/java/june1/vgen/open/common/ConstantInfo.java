@@ -60,4 +60,16 @@ public class ConstantInfo {
     // query
     //-----------------------
     public static final int QUERY_SIZE_LIMIT = Integer.MAX_VALUE;
+
+    //-----------------------
+    // password
+    //-----------------------
+    public static final int PASSWORD_MAX_LENGTH = 12;
+    public static final int PASSWORD_MIN_LENGTH = 8;
+
+    //-----------------------
+    // file
+    //-----------------------
+    public static final String FILE_ROOT_PATH = "/Users/june1/files";
+    public static final String MEMBER_IMAGE_FILE_PATH = "/member/images";
 }

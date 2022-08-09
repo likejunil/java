@@ -6,18 +6,13 @@ import june1.vgen.open.common.exception.client.NoSuchMemberException;
 import june1.vgen.open.common.jwt.JwtUserInfo;
 import june1.vgen.open.common.jwt.Token;
 import june1.vgen.open.common.jwt.TokenProvider;
+import june1.vgen.open.common.util.FileUtil;
 import june1.vgen.open.controller.auth.dto.LoginResDto;
 import june1.vgen.open.controller.auth.dto.MemberResDto;
 import june1.vgen.open.controller.auth.dto.RegisterMemberReqDto;
-import june1.vgen.open.domain.Company;
-import june1.vgen.open.domain.Member;
-import june1.vgen.open.domain.RedisToken;
-import june1.vgen.open.domain.RedisUser;
+import june1.vgen.open.domain.*;
 import june1.vgen.open.domain.enumeration.Role;
-import june1.vgen.open.repository.CompanyRepository;
-import june1.vgen.open.repository.MemberRepository;
-import june1.vgen.open.repository.RedisTokenRepository;
-import june1.vgen.open.repository.RedisUserRepository;
+import june1.vgen.open.repository.*;
 import june1.vgen.open.service.dto.TokenDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,8 +20,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static june1.vgen.open.common.ConstantInfo.CODE_AUTH;
-import static june1.vgen.open.common.ConstantInfo.CODE_MEMBER;
+import java.io.IOException;
+
+import static june1.vgen.open.common.ConstantInfo.*;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -38,8 +34,11 @@ public class AuthService {
 
     private final TokenProvider tokenProvider;
     private final PasswordEncoder passwordEncoder;
+    private final FileUtil fileUtil;
+
     private final MemberRepository memberRepository;
     private final CompanyRepository companyRepository;
+    private final AttachmentFileRepository attachmentFileRepository;
     private final RedisUserRepository redisUserRepository;
     private final RedisTokenRepository redisTokenRepository;
 
@@ -55,7 +54,7 @@ public class AuthService {
      * @return
      */
     @Transactional
-    public MemberResDto register(RegisterMemberReqDto dto) {
+    public MemberResDto register(RegisterMemberReqDto dto) throws IOException {
         //1.해당 아이디의 회원이 이미 존재하는지 확인
         memberRepository.findByMemberId(dto.getMemberId())
                 .ifPresent(m -> {
@@ -82,19 +81,28 @@ public class AuthService {
         Role role = Role.ROLE_ADMIN;
         if (c != null) role = Role.ROLE_USER;
 
-        //4.회원을 생성하고 저장
+        //4만약 image 를 업로드 한다면.. 해당 파일을 저장
+        AttachmentFile f = null;
+        if (dto.getImage() != null && !dto.getImage().isEmpty()) {
+            f = attachmentFileRepository.save(fileUtil
+                    .saveFile(dto.getImage(), MEMBER_IMAGE_FILE_PATH)
+                    .toAttachmentFile());
+        }
+
+        //5.회원을 생성하고 저장
         Member m = memberRepository.save(Member.builder()
                 .memberId(dto.getMemberId())
                 .password(passwordEncoder.encode(dto.getPassword()))
+                .inUse(true)
                 .memberName(dto.getMemberName())
                 .email(dto.getEmail())
                 .phoneNum(dto.getPhoneNum())
                 .role(role)
                 .company(c)
-                .inUse(true)
+                .image(f)
                 .build());
 
-        //4.저장된 회원의 고유번호를 반환
+        //6.저장된 회원의 고유번호를 반환
         return MemberResDto.builder()
                 .seq(m.getId())
                 .build();

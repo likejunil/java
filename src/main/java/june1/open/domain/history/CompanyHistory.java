@@ -1,0 +1,26 @@
+package june1.open.domain.history;
+
+import june1.open.common.annotation.BackupEntity;
+import june1.open.domain.CompanyCore;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
+
+import javax.persistence.Embedded;
+import javax.persistence.Entity;
+import javax.persistence.Table;
+
+@Entity
+@Table(name = "be_company_history")
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
+@SuperBuilder
+@BackupEntity
+public class CompanyHistory extends CompanyCore {
+
+    @Embedded
+    private History history;
+}
+

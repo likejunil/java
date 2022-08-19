@@ -44,7 +44,6 @@ public class AuthController {
     @PostMapping(URI_LOGIN)
     public Response<LoginResDto> login(
             @Valid @RequestBody LoginReqDto dto) {
-
         return Response.ok(authService.login(dto.getUserId(), dto.getPassword()));
     }
 
@@ -57,7 +56,6 @@ public class AuthController {
     @PostMapping(URI_REISSUE)
     public Response<LoginResDto> reissue(
             @Valid @RequestBody ReissueReqDto dto) {
-
         return Response.ok(authService.reissue(dto.getToken()));
     }
 
@@ -70,7 +68,6 @@ public class AuthController {
     @GetMapping(URI_LOGOUT)
     public Response<MemberResDto> logout(
             @AuthenticationPrincipal JwtUserInfo user) {
-
         return Response.ok(authService.logout(user));
     }
 }

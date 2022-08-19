@@ -18,6 +18,8 @@ import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
@@ -128,22 +130,46 @@ public class ExceptionController {
                         .build()));
     }
 
-    //인증과 관련한 예외가 발생했을 때.. (정체를 확인하지 못했을 때)
+    //인증과 관련한 예외가 발생했을 때.. (사용자 정의에 의해..)
     @ExceptionHandler
-    protected ResponseEntity<Response> handleAuthenticationException(
+    protected ResponseEntity<Response> handleAuthenticationException_1(
             WrongAuthenticationException e, HttpServletRequest req) {
         log.error("인증 예외가 발생했습니다.[{}]", req.getRequestURI());
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                 .body(Response.error(null, Error.by(e)));
     }
 
-    //인가와 관련된 예외가 발생했을 때.. (허가받지 못한 자원에 접근했을 때)
+    //인증과 관련한 예외가 발생했을 때.. (스프링 시큐리티에 의해..)
     @ExceptionHandler
-    protected ResponseEntity<Response> handleAuthoritiesException(
+    protected ResponseEntity<Response> handleAuthenticationException_2(
+            AuthenticationException e, HttpServletRequest req) {
+        log.error("인증 예외가 발생했습니다.[{}]", req.getRequestURI());
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(Response.error(null, Error.builder()
+                        .code(CODE_AUTH)
+                        .defaultMessage(e.getMessage())
+                        .build()));
+    }
+
+    //인가와 관련된 예외가 발생했을 때.. (사용자 정의에 의해..)
+    @ExceptionHandler
+    protected ResponseEntity<Response> handleAuthoritiesException_1(
             WrongAuthoritiesException e, HttpServletRequest req) {
         log.error("인가 예외가 발생했습니다.[{}]", req.getRequestURI());
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
                 .body(Response.error(null, Error.by(e)));
+    }
+
+    //인가와 관련된 예외가 발생했을 때.. (스프링 시큐리티에 의해..)
+    @ExceptionHandler
+    protected ResponseEntity<Response> handleAuthoritiesException_2(
+            AccessDeniedException e, HttpServletRequest req) {
+        log.error("인가 예외가 발생했습니다.[{}]", req.getRequestURI());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(Response.error(null, Error.builder()
+                        .code(CODE_AUTH)
+                        .defaultMessage(e.getMessage())
+                        .build()));
     }
 
     //보안에 관련된 일반적인 예외가 발생했을 때..

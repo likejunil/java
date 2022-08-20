@@ -23,18 +23,22 @@ import java.util.Map;
 import java.util.Optional;
 
 @Slf4j
-public class ItemRepositoryV2 implements ItemRepository {
+public class JdbcItemRepositoryV2 implements ItemRepository {
 
     private final NamedParameterJdbcTemplate template;
     private final SimpleJdbcInsert jdbcInsert;
 
-    public ItemRepositoryV2(DataSource dataSource) {
+    public JdbcItemRepositoryV2(DataSource dataSource) {
         this.template = new NamedParameterJdbcTemplate(dataSource);
         this.jdbcInsert = new SimpleJdbcInsert(dataSource)
                 .withTableName("item")
                 .usingGeneratedKeyColumns("id");
     }
 
+    /**
+     * @param item
+     * @return
+     */
     @Override
     public Item save(Item item) {
         Long id = null;
@@ -59,6 +63,10 @@ public class ItemRepositoryV2 implements ItemRepository {
                 .orElse(null);
     }
 
+    /**
+     * @param id
+     * @param dto
+     */
     @Override
     public void update(Long id, UpdateItemDto dto) {
         String sql = "update item set name=:name, price=:price, quantity=:quantity where id=:id";
@@ -71,6 +79,10 @@ public class ItemRepositoryV2 implements ItemRepository {
         template.update(sql, params);
     }
 
+    /**
+     * @param id
+     * @return
+     */
     @Override
     public Optional<Item> findById(Long id) {
         String sql = "select id, name, price, quantity from item where id=:id";
@@ -85,6 +97,10 @@ public class ItemRepositoryV2 implements ItemRepository {
         }
     }
 
+    /**
+     * @param cond
+     * @return
+     */
     @Override
     public List<Item> findAll(SearchItemCond cond) {
         String sql = "select id, name, price, quantity from item where 1 = 1";

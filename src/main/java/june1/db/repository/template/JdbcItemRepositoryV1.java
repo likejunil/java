@@ -19,11 +19,11 @@ import java.util.List;
 import java.util.Optional;
 
 @Slf4j
-public class ItemRepositoryV1 implements ItemRepository {
+public class JdbcItemRepositoryV1 implements ItemRepository {
 
     private final JdbcTemplate template;
 
-    public ItemRepositoryV1(DataSource dataSource) {
+    public JdbcItemRepositoryV1(DataSource dataSource) {
         this.template = new JdbcTemplate(dataSource);
     }
 

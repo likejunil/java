@@ -1,6 +1,7 @@
 package june1.db.repository.memory;
 
 import june1.db.domain.Item;
+import june1.db.repository.ItemRepository;
 import june1.db.repository.dto.SearchItemCond;
 import june1.db.repository.dto.UpdateItemDto;
 import lombok.extern.slf4j.Slf4j;
@@ -15,7 +16,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import static java.util.stream.Collectors.toList;
 
 @Slf4j
-public class ItemRepository implements june1.db.repository.ItemRepository {
+public class MemoryItemRepository implements ItemRepository {
 
     private static final Map<Long, Item> store = new ConcurrentHashMap<>();
     private static Long seq = 0L;

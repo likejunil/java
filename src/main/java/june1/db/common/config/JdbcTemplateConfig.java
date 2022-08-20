@@ -1,7 +1,7 @@
 package june1.db.common.config;
 
 import june1.db.repository.ItemRepository;
-import june1.db.repository.template.ItemRepositoryV2;
+import june1.db.repository.template.JdbcItemRepositoryV2;
 import june1.db.service.ItemService;
 import june1.db.service.ItemServiceImpl;
 import lombok.RequiredArgsConstructor;
@@ -20,8 +20,8 @@ public class JdbcTemplateConfig {
 
     @Bean
     public ItemRepository itemRepository() {
-        //return new ItemRepositoryV1(dataSource);
-        return new ItemRepositoryV2(dataSource);
+        //return new JdbcItemRepositoryV1(dataSource);
+        return new JdbcItemRepositoryV2(dataSource);
     }
 
     @Bean

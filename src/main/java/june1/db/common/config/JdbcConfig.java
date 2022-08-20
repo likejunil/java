@@ -3,8 +3,9 @@ package june1.db.common.config;
 import com.zaxxer.hikari.HikariDataSource;
 import june1.db.repository.JdbcMemberRepository;
 import june1.db.repository.MemberRepository;
+import june1.db.service.JdbcMemberService;
+import june1.db.service.MemberService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
@@ -23,7 +24,6 @@ public class JdbcConfig {
     //private final DataSource dataSource;
 
     @Bean
-    @Qualifier("hikari")
     public DataSource hikari() {
         HikariDataSource dataSource = new HikariDataSource();
         dataSource.setJdbcUrl(URL);
@@ -34,7 +34,6 @@ public class JdbcConfig {
     }
 
     @Bean
-    @Qualifier("driverManger")
     public DataSource driverManager() {
         DriverManagerDataSource dataSource = new DriverManagerDataSource();
         dataSource.setUrl(URL);
@@ -44,9 +43,14 @@ public class JdbcConfig {
     }
 
     @Bean
-    public MemberRepository memberRepository() {
+    public MemberRepository jdbcMemberRepository() {
         //어떤 DataSource 를 선택하여 memberRepository 를 생성할 것인가?
-        DataSource ds = hikari();
-        return new JdbcMemberRepository(ds);
+        return new JdbcMemberRepository(hikari());
+    }
+
+    @Bean
+    public MemberService jdbcMemberService() {
+        //어떤 DataSource 를 선택하여 memberService 를 생성할 것인가?
+        return new JdbcMemberService(hikari());
     }
 }

@@ -1,9 +1,8 @@
 package june1.db.repository;
 
-import june1.db.common.DriverManagerUtil;
 import june1.db.common.exception.DbException;
+import june1.db.common.util.DriverManagerUtil;
 import june1.db.domain.Member;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.support.JdbcUtils;
 
@@ -17,11 +16,15 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 @Slf4j
-@RequiredArgsConstructor
 public class JdbcMemberRepository implements MemberRepository {
 
     private final DataSource dataSource;
-    private final DriverManagerUtil driverManagerUtil = new DriverManagerUtil();
+    private final DriverManagerUtil driverManagerUtil;
+
+    public JdbcMemberRepository(DataSource dataSource) {
+        this.dataSource = dataSource;
+        this.driverManagerUtil = new DriverManagerUtil();
+    }
 
     //-------------------------------------------------
     //저장

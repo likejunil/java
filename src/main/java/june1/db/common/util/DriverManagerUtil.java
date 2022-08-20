@@ -1,4 +1,4 @@
-package june1.db.common;
+package june1.db.common.util;
 
 import june1.db.common.exception.DbConnFailException;
 import lombok.extern.slf4j.Slf4j;

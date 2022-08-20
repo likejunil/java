@@ -1,10 +1,12 @@
 package june1.db.repository;
 
-import june1.db.common.exception.DbException;
 import june1.db.common.util.DriverManagerUtil;
 import june1.db.domain.Member;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.jdbc.support.JdbcUtils;
+import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
+import org.springframework.jdbc.support.SQLExceptionTranslator;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -19,11 +21,12 @@ import java.util.NoSuchElementException;
 public class JdbcMemberRepository implements MemberRepository {
 
     private final DataSource dataSource;
-    private final DriverManagerUtil driverManagerUtil;
+    private final SQLExceptionTranslator translator;
+    private final DriverManagerUtil driverManagerUtil = new DriverManagerUtil();
 
     public JdbcMemberRepository(DataSource dataSource) {
         this.dataSource = dataSource;
-        this.driverManagerUtil = new DriverManagerUtil();
+        this.translator = new SQLErrorCodeSQLExceptionTranslator(dataSource);
     }
 
     //-------------------------------------------------
@@ -45,8 +48,7 @@ public class JdbcMemberRepository implements MemberRepository {
 
         } catch (SQLException e) {
             log.error("저장 실패.. 메시지=[{}]", e.getMessage());
-            throw new DbException(e);
-
+            throw translator.translate("save", sql, e);
         } finally {
             close(conn, stmt, null);
         }
@@ -79,42 +81,10 @@ public class JdbcMemberRepository implements MemberRepository {
 
         } catch (SQLException e) {
             log.error("조회 실패.. 메시지=[{}]", e.getMessage());
-            throw new DbException(e);
+            throw translator.translate("findByName", sql, e);
 
         } finally {
             close(conn, stmt, rs);
-        }
-    }
-
-    //-------------------------------------------------
-    //단건 조회(트랜잭션 사용)
-    //-------------------------------------------------
-    public Member findByName(Connection conn, String name) {
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        String sql = "select * from member where member.name = ?";
-
-        try {
-            stmt = conn.prepareStatement(sql);
-            stmt.setString(1, name);
-            rs = stmt.executeQuery();
-            if (rs.next()) {
-                return Member.builder()
-                        .id(rs.getLong("id"))
-                        .name(rs.getString("name"))
-                        .money(rs.getLong("money"))
-                        .build();
-            } else {
-                log.error("[{}]: 해당 회원은 존재하지 않습니다.", name);
-                throw new NoSuchElementException(name + ": 해당 회원은 존재하지 않습니다.");
-            }
-
-        } catch (SQLException e) {
-            log.error("조회 실패.. 메시지=[{}]", e.getMessage());
-            throw new DbException(e);
-
-        } finally {
-            close(null, stmt, rs);
         }
     }
 
@@ -144,7 +114,7 @@ public class JdbcMemberRepository implements MemberRepository {
 
         } catch (SQLException e) {
             log.error("조회 실패.. 메시지=[{}]", e.getMessage());
-            throw new DbException(e);
+            throw translator.translate("findAll", sql, e);
 
         } finally {
             close(conn, stmt, rs);
@@ -170,34 +140,10 @@ public class JdbcMemberRepository implements MemberRepository {
 
         } catch (SQLException e) {
             log.error("변경 실패.. 메시지=[{}]", e.getMessage());
-            throw new DbException(e);
+            throw translator.translate("update", sql, e);
 
         } finally {
             close(conn, stmt, null);
-        }
-    }
-
-    //-------------------------------------------------
-    //변경(트랜잭션 사용)
-    //-------------------------------------------------
-    public int update(Connection conn, String name, Long money) {
-        PreparedStatement stmt = null;
-        String sql = "update member set money = ? where name = ?";
-
-        try {
-            stmt = conn.prepareStatement(sql);
-            stmt.setLong(1, money);
-            stmt.setString(2, name);
-            int count = stmt.executeUpdate();
-            log.info("{} 건이 변경되었습니다.", count);
-            return count;
-
-        } catch (SQLException e) {
-            log.error("변경 실패.. 메시지=[{}]", e.getMessage());
-            throw new DbException(e);
-
-        } finally {
-            close(null, stmt, null);
         }
     }
 
@@ -219,7 +165,7 @@ public class JdbcMemberRepository implements MemberRepository {
 
         } catch (SQLException e) {
             log.error("삭제 실패.. 메시지=[{}]", e.getMessage());
-            throw new DbException(e);
+            throw translator.translate("delete", sql, e);
 
         } finally {
             close(conn, stmt, null);
@@ -231,13 +177,22 @@ public class JdbcMemberRepository implements MemberRepository {
     }
 
     private Connection getConnection(boolean create) throws SQLException {
-        if (create || dataSource == null) return driverManagerUtil.getConnection();
-        else return dataSource.getConnection();
+        if (create || dataSource == null) {
+            //DriverManager 를 사용할 경우, 해당 리포지토리에서는 트랜잭션을 사용할 수 없다.
+            return driverManagerUtil.getConnection();
+        } else {
+            //DataSourceUtils.getConnection() 에 의해서 트랜잭션을 위해 사용할 커넥션을 얻을 수 있다.
+            //트랜잭션 동기화 매니저에 담겨 있는 커넥션을 얻어온다.
+            return DataSourceUtils.getConnection(dataSource);
+        }
     }
 
     private void close(Connection conn, PreparedStatement stmt, ResultSet rs) {
         JdbcUtils.closeResultSet(rs);
         JdbcUtils.closeStatement(stmt);
-        JdbcUtils.closeConnection(conn);
+        //트랜잭션을 유지하려면 conn 을 그냥 close() 해서는 안된다.
+        //그냥 close() 를 해버리면 커넥션이 유지가 되지 않는다.
+        //커넥션은 커밋 혹은 롤백까지 반드시 살아있어야 한다.
+        DataSourceUtils.releaseConnection(conn, dataSource);
     }
 }

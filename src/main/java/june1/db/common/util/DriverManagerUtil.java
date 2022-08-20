@@ -2,6 +2,7 @@ package june1.db.common.util;
 
 import june1.db.common.exception.DbConnFailException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 
 import java.sql.Connection;
 import java.sql.DriverManager;

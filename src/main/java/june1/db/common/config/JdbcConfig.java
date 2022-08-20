@@ -1,6 +1,7 @@
 package june1.db.common.config;
 
 import com.zaxxer.hikari.HikariDataSource;
+import june1.db.controller.MemberController;
 import june1.db.repository.JdbcMemberRepository;
 import june1.db.repository.MemberRepository;
 import june1.db.service.JdbcMemberService;
@@ -70,5 +71,10 @@ public class JdbcConfig {
     @Bean
     public MemberService jdbcMemberService() {
         return new JdbcMemberService(jdbcMemberRepository(), transactionManager());
+    }
+
+    @Bean
+    public MemberController memberController() {
+        return new MemberController(jdbcMemberService());
     }
 }

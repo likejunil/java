@@ -24,7 +24,6 @@ public class JdbcMemberService implements MemberService {
     public JdbcMemberService(
             MemberRepository memberRepository,
             PlatformTransactionManager transactionManager) {
-
         this.memberRepository = memberRepository;
         this.transactionManager = transactionManager;
     }
@@ -73,9 +72,8 @@ public class JdbcMemberService implements MemberService {
      * @return
      */
     public TransferResDto transfer(TransferReqDto dto) {
-        TransactionStatus status = transactionManager
-                .getTransaction(new DefaultTransactionDefinition());
-
+        TransactionStatus status = transactionManager.getTransaction(
+                new DefaultTransactionDefinition());
         try {
             TransferResDto ret = bizProc(dto);
             transactionManager.commit(status);

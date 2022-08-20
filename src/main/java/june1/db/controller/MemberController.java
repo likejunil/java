@@ -11,7 +11,7 @@ import java.sql.SQLException;
 @Slf4j
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/v1")
+@RequestMapping("/member")
 public class MemberController {
 
     private final MemberService memberService;

@@ -1,5 +1,8 @@
 spring:
 
+  profiles:
+    active: local
+
   datasource:
     url: jdbc:mariadb://localhost/DB?characterEncoding=UTF-8
     username: june1

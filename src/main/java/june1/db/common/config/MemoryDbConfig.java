@@ -1,12 +1,9 @@
 package june1.db.common.config;
 
 import june1.db.common.util.TestDataInit;
-import june1.db.controller.HomeController;
-import june1.db.controller.ItemController;
-import june1.db.repository.ItemRepository;
-import june1.db.repository.MemoryItemRepository;
+import june1.db.repository.memory.ItemRepository;
 import june1.db.service.ItemService;
-import june1.db.service.MemoryItemService;
+import june1.db.service.ItemServiceImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -15,28 +12,18 @@ import org.springframework.context.annotation.Profile;
 public class MemoryDbConfig {
 
     @Bean
-    public ItemRepository memoryItemRepository() {
-        return new MemoryItemRepository();
+    public june1.db.repository.ItemRepository itemRepository() {
+        return new ItemRepository();
     }
 
     @Bean
-    public ItemService memoryItemService() {
-        return new MemoryItemService(memoryItemRepository());
-    }
-
-    @Bean
-    public HomeController HomeController() {
-        return new HomeController();
-    }
-
-    @Bean
-    public ItemController itemController() {
-        return new ItemController(memoryItemService());
+    public ItemService itemService() {
+        return new ItemServiceImpl(itemRepository());
     }
 
     @Bean
     @Profile("local")
     public TestDataInit testDataInit() {
-        return new TestDataInit(memoryItemRepository());
+        return new TestDataInit(itemRepository());
     }
 }

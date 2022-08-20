@@ -1,6 +1,6 @@
 package june1.db.common;
 
-import june1.db.common.util.DriverManagerUtil;
+import june1.db.basic.common.util.DriverManagerUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 

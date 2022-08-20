@@ -1,6 +1,6 @@
-package june1.db.controller.dto;
+package june1.db.basic.controller.dto;
 
-import june1.db.domain.Member;
+import june1.db.basic.domain.Member;
 import lombok.Builder;
 import lombok.Getter;
 

@@ -1,14 +1,13 @@
-package june1.db.common.util;
+package june1.db.basic.common.util;
 
 import june1.db.common.exception.DbConnFailException;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-import static june1.db.common.ConstantInfo.*;
+import static june1.db.basic.common.ConstantInfo.*;
 
 @Slf4j
 public class DriverManagerUtil {

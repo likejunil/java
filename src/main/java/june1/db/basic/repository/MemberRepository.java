@@ -1,6 +1,6 @@
-package june1.db.repository;
+package june1.db.basic.repository;
 
-import june1.db.domain.Member;
+import june1.db.basic.domain.Member;
 
 import java.util.List;
 

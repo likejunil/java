@@ -1,11 +1,10 @@
-package june1.db.common.config;
+package june1.db.basic.common.config;
 
 import com.zaxxer.hikari.HikariDataSource;
-import june1.db.controller.MemberController;
-import june1.db.repository.JdbcMemberRepository;
-import june1.db.repository.MemberRepository;
-import june1.db.service.JdbcMemberService;
-import june1.db.service.MemberService;
+import june1.db.basic.repository.JdbcMemberRepository;
+import june1.db.basic.repository.MemberRepository;
+import june1.db.basic.service.JdbcMemberService;
+import june1.db.basic.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,11 +14,11 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.sql.DataSource;
 
-import static june1.db.common.ConstantInfo.*;
+import static june1.db.basic.common.ConstantInfo.*;
 
 @Configuration
 @RequiredArgsConstructor
-public class JdbcConfig {
+public class JdbcBasicConfig {
 
     //사용자가 직접 만든 DataSource 가 존재할 때..
     //스프링부트가 알아서 주입해주는 DataSource 는 사라진다.
@@ -71,10 +70,5 @@ public class JdbcConfig {
     @Bean
     public MemberService jdbcMemberService() {
         return new JdbcMemberService(jdbcMemberRepository(), transactionManager());
-    }
-
-    @Bean
-    public MemberController memberController() {
-        return new MemberController(jdbcMemberService());
     }
 }

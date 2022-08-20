@@ -1,4 +1,4 @@
-package june1.db.controller.dto;
+package june1.db.basic.controller.dto;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;

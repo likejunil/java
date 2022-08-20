@@ -1,4 +1,4 @@
-package june1.db.repository;
+package june1.db.repository.memory;
 
 import june1.db.domain.Item;
 import june1.db.repository.dto.SearchItemCond;
@@ -15,7 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import static java.util.stream.Collectors.toList;
 
 @Slf4j
-public class MemoryItemRepository implements ItemRepository {
+public class ItemRepository implements june1.db.repository.ItemRepository {
 
     private static final Map<Long, Item> store = new ConcurrentHashMap<>();
     private static Long seq = 0L;

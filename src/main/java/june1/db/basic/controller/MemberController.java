@@ -1,7 +1,7 @@
-package june1.db.controller;
+package june1.db.basic.controller;
 
-import june1.db.controller.dto.*;
-import june1.db.service.MemberService;
+import june1.db.basic.controller.dto.*;
+import june1.db.basic.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;

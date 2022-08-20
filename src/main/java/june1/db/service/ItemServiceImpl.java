@@ -12,7 +12,7 @@ import java.util.Optional;
 
 @Slf4j
 @RequiredArgsConstructor
-public class MemoryItemService implements ItemService {
+public class ItemServiceImpl implements ItemService {
 
     private final ItemRepository itemRepository;
 

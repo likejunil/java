@@ -1,4 +1,4 @@
-package june1.db.domain;
+package june1.db.basic.domain;
 
 import lombok.Builder;
 import lombok.Getter;

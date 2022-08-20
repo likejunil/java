@@ -1,7 +1,9 @@
 package june1.db.repository;
 
 import com.zaxxer.hikari.HikariDataSource;
-import june1.db.domain.Member;
+import june1.db.basic.domain.Member;
+import june1.db.basic.repository.JdbcMemberRepository;
+import june1.db.basic.repository.MemberRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -10,7 +12,7 @@ import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import javax.sql.DataSource;
 import java.util.NoSuchElementException;
 
-import static june1.db.common.ConstantInfo.*;
+import static june1.db.basic.common.ConstantInfo.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 

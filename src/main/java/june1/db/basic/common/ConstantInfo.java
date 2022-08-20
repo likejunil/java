@@ -1,4 +1,4 @@
-package june1.db.common;
+package june1.db.basic.common;
 
 public class ConstantInfo {
 

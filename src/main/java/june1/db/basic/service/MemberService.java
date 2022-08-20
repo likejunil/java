@@ -1,6 +1,6 @@
-package june1.db.service;
+package june1.db.basic.service;
 
-import june1.db.controller.dto.*;
+import june1.db.basic.controller.dto.*;
 
 public interface MemberService {
 

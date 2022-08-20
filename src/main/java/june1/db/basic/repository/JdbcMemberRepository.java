@@ -1,7 +1,8 @@
-package june1.db.repository;
+package june1.db.basic.repository;
 
-import june1.db.common.util.DriverManagerUtil;
-import june1.db.domain.Member;
+import june1.db.basic.common.util.DriverManagerUtil;
+import june1.db.basic.domain.Member;
+import june1.db.basic.repository.MemberRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.jdbc.support.JdbcUtils;

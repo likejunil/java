@@ -1,0 +1,8 @@
+spring:
+
+  datasource:
+    url: jdbc:mariadb://localhost/DB?characterEncoding=UTF-8
+    username: june1
+    password: qweQWE123!@#
+    driver-class-name: org.mariadb.jdbc.Driver
+

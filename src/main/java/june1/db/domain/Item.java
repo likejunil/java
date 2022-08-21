@@ -1,13 +1,23 @@
 package june1.db.domain;
 
-import lombok.Builder;
-import lombok.Getter;
+import lombok.*;
 
+import javax.persistence.*;
+
+@Setter
+@Entity
+@Table(name = "item")
 @Getter
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 public class Item {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(name = "name", length = 64)
     private String name;
     private Integer price;
     private Integer quantity;

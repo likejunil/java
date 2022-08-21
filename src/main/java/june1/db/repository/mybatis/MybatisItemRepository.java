@@ -36,4 +36,20 @@ public class MybatisItemRepository implements ItemRepository {
     public List<Item> findAll(SearchItemCond cond) {
         return mapper.findAll(cond);
     }
+
+    public void insertFreeItem(Item item) {
+        mapper.insertFreeItem(item);
+    }
+
+    public void updateNegativePrice(int price) {
+        mapper.updateNegativePrice(price);
+    }
+
+    public List<Item> findSoldOut(String column) {
+        return mapper.findSoldOut(column);
+    }
+
+    public void deleteSoldOut() {
+        mapper.deleteSoldOut();
+    }
 }

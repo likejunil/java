@@ -4,6 +4,7 @@
 
 <mapper namespace="june1.db.repository.mybatis.ItemMapper">
 
+    <!-- 데이터베이스가 identity 전략을 사용할 경우, useGeneratedKeys 를 사용 -->
     <insert id="save" useGeneratedKeys="true" keyProperty="id">
         insert into item (name, price, quantity)
         values (#{name}, #{price}, #{quantity})
@@ -18,12 +19,20 @@
     </update>
 
     <select id="findById" resultType="Item">
-        select id, name, price, quantity from item
+        select
+        <include refid="columns">
+            <property name="dto" value="item"/>
+        </include>
+        from item
         where id = #{id}
     </select>
 
-    <select id="findAll" resultType="Item">
-        select id, name, price, quantity from item
+    <select id="findAll" resultMap="ItemResultMap">
+        select
+        <include refid="columns">
+            <property name="dto" value="item"/>
+        </include>
+        from item
         <where>
             <if test="name != null and name != ''">
                 and name like concat('%', #{name}, '%')
@@ -33,5 +42,19 @@
             </if>
         </where>
     </select>
+
+    <sql id="columns">
+        ${dto}.id,
+        ${dto}.name,
+        ${dto}.price,
+        ${dto}.quantity
+    </sql>
+
+    <resultMap id="ItemResultMap" type="Item">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="price" column="price"/>
+        <result property="quantity" column="quantity"/>
+    </resultMap>
 
 </mapper>

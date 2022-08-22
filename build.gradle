@@ -8,6 +8,9 @@ group = 'june1.db2'
 version = '0.0.1-SNAPSHOT'
 sourceCompatibility = '11'
 
+//특정 버전을 지정하여 사용할 때..
+ext["hibernate.version"] = "5.6.10.Final"
+
 configurations {
     compileOnly {
         extendsFrom annotationProcessor

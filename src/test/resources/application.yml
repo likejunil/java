@@ -2,3 +2,27 @@ spring:
 
   profiles:
     active: test
+
+  datasource:
+    url: jdbc:mariadb://localhost/DB?characterEncoding=UTF-8
+    username: june1
+    password: qweQWE123!@#
+    driver-class-name: org.mariadb.jdbc.Driver
+
+mybatis:
+  # 패키지 이름을 생략할 수 있도록 해준다.
+  type-aliases-package: june1.db.domain
+  # 언더바를 카멜로 자동 변경해준다.
+  configuration.map-underscore-to-camel-case: true
+  # xml 파일의 위치를 바꾸고 싶다면..
+  #mapper-locations: classpath:mybatis/mapper/**/*.xml
+
+logging:
+  level:
+    # 트랜잭션 프록시가 호출하는 트랜잭션의 시작과 종료를 명확하게 로그로 확인..
+    org.springframework.transaction.interceptor: trace
+    # 트랜잭션 매니저 로그 확인..
+    org.springframework.jdbc.datasource.DataSourceTransacationManager: debug
+    org.springframework.orm.jpa.JpaTransactionManager: debug
+
+    org.hibernate.resource.transaction: debug

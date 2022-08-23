@@ -46,7 +46,7 @@ public class InitTxTest {
         /**
          * 스프링 트랜잭션 AOP 는..
          * 스프링이 완전하게 가동된 후 적용된다.
-         * 즉, @PostConstruct 가 처리된 후에 @InitTxTest 이 적용된다.
+         * 즉, @PostConstruct 가 처리된 후에 @Transactional 이 적용된다.
          * 따라서 다음 초기화 메서드는 트랜잭션을 적용받지 못한다.
          * <p>
          * 보통.. @PostConstruct 는 빈후처리기(Post Bean Processor)에 의해 처리되기 때문에..

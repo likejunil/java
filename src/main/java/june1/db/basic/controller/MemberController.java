@@ -56,7 +56,7 @@ public class MemberController {
      * @return
      */
     @PutMapping
-    public TransferResDto transfer(@RequestBody TransferReqDto dto) throws SQLException {
+    public TransferResDto transfer(@RequestBody TransferReqDto dto) {
         return memberService.transfer(dto);
     }
 }

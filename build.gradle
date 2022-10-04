@@ -1,10 +1,11 @@
 plugins {
-    id 'org.springframework.boot' version '2.6.1'
-    id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+    id 'org.springframework.boot' version '2.7.4'
+    id 'io.spring.dependency-management' version '1.0.14.RELEASE'
     id 'java'
+    id 'war'
 }
 
-group = 'june1'
+group = 'june1.study.java'
 version = '0.0.1-SNAPSHOT'
 sourceCompatibility = '11'
 
@@ -19,17 +20,32 @@ repositories {
 }
 
 dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-jdbc'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-web'
-    developmentOnly 'org.springframework.boot:spring-boot-devtools'
-    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+    implementation 'org.springframework.boot:spring-boot-starter-websocket'
+    providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
+
+    // mybatis 설정
+    implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:2.2.2'
+
+    // jsp 설정
+    implementation 'org.apache.tomcat.embed:tomcat-embed-jasper'
+    implementation 'javax.servlet:jstl'
+
+    // oracle 설정
+    runtimeOnly 'com.oracle.database.jdbc:ojdbc8'
+
+    // lombok 설정
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
-
     testCompileOnly 'org.projectlombok:lombok'
     testAnnotationProcessor 'org.projectlombok:lombok'
+
+    // junit 설정
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
 
-test {
+tasks.named('test') {
     useJUnitPlatform()
 }

@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0/EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 해당 xml 파일을 사용하는 interface 지정 -->
+<mapper namespace="june1.study.java.jsp_mybatis_oracle.repository.mybatis.ItemMapper">
+
+    <!-- 데이터베이스(MySQL)가 identity 전략을 사용할 경우, useGeneratedKeys 를 사용 -->
+    <!-- <insert id="save" useGeneratedKeys="true" keyProperty="id"> -->
+    <insert id="save" keyProperty="id">
+        insert into item (id, item_name, price, quantity)
+        values (seq_item.nextval, #{itemName}, #{price}, #{quantity})
+    </insert>
+
+    <update id="update">
+        update item
+        set item_name = #{updateParam.itemName},
+            price     = #{updateParam.price},
+            quantity  = #{updateParam.quantity}
+        where id = #{id}
+    </update>
+
+    <select id="findAll" resultMap="itemResultMap">
+        select
+        <include refid="columns">
+            <property name="dto" value="item"/>
+        </include>
+        from item
+        <where>
+            <if test="itemName != null and itemName != ''">
+                and item_name like concat(concat('%', #{itemName}), '%')
+            </if>
+            <if test="maxPrice != null">
+                and price &lt;= #{maxPrice}
+            </if>
+        </where>
+    </select>
+
+    <select id="findById" resultType="Item">
+        select
+        <include refid="columns">
+            <property name="dto" value="item"/>
+        </include>
+        from item
+        where id = #{id}
+    </select>
+
+    <delete id="deleteById">
+        delete
+        from item
+        where id = #{id}
+    </delete>
+
+    <sql id="columns">
+        ${dto}.id,
+        ${dto}
+        .
+        item_name,
+        ${dto}
+        .
+        price,
+        ${dto}
+        .
+        quantity
+    </sql>
+
+    <!-- column 은 실제 이름, property 는 별명(alias)이다. -->
+    <resultMap id="itemResultMap" type="Item">
+        <id property="id" column="id"/>
+        <result property="item_name" column="item_name"/>
+        <result property="price" column="price"/>
+        <result property="quantity" column="quantity"/>
+    </resultMap>
+</mapper>

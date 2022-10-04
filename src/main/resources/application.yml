@@ -1,22 +1,39 @@
 spring:
+
+  #-------------------------------
+  # JSP
+  #-------------------------------
+  mvc.view:
+    prefix: /WEB-INF/views/
+    suffix: .jsp
+
+  #-------------------------------
+  # DataSource
+  #-------------------------------
   datasource:
-    url: jdbc:mariadb://localhost:3306/study
+    url: jdbc:oracle:thin:@192.168.0.2:1521:xe
     username: june1
     password: qweQWE123!@#
-    driver-class-name: org.mariadb.jdbc.Driver
+    driver-class-name: oracle.jdbc.OracleDriver
 
-  jpa:
-    properties:
-      hibernate:
-        show_sql: true
-        format_sql: true
-        use_sql_comments: true
-        default_batch_fetch_size: 100
+#-------------------------------
+# MyBatis
+#-------------------------------
+mybatis:
+  # 타입 정보를 사용할 때 적어주어야 하는 패키지 이름을 생략할 수 있다.
+  # 지정한 값이 가리키는 패키지와 그 하위 패키지는 자동으로 인식된다.
+  # xml 파일의 resultType 속성에 적용된다.
+  type-aliases-package: june1.study.java.jsp_mybatis_oracle.domain
 
-    hibernate:
-      ddl-auto: create
+  # xml 파일을 원하는 위치에 두기 위한 정보를 설정한다.
+  mapper-locations: classpath:mybatis/mapper/**/*.xml
 
-    open-in-view: false
+  # DB 의 underscore 규칙을 Java 의 camel-case 로 변환해 준다.
+  configuration.map-underscore-to-camel-case: true
 
-server:
-  port: 8080
+#-------------------------------
+# Logging
+#-------------------------------
+logging:
+  level:
+    june1.study.java.jsp_mybatis_oracle.repository.mybatis: trace
